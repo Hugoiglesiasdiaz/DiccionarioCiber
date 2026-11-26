@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../lib/url';
+---
+
+<BaseLayout title="No encontrado">
+  <div class="container page">
+    <div class="terminal not-found">
+      <div class="terminal__bar">
+        <span class="terminal__dot"></span><span class="terminal__dot"></span><span class="terminal__dot"></span>
+        <span class="terminal__title">error 404</span>
+      </div>
+      <div class="terminal__body">
+        <p class="cmd">cat pagina-solicitada</p>
+        <p class="out" style="color: var(--red)">cat: pagina-solicitada: No such file or directory</p>
+        <p class="cmd">cd <a href={url('/')}>~</a> &amp;&amp; <a href={url('/buscar/')}>buscar</a></p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    max-width: 40rem;
+    margin: var(--space-7) auto;
+  }
+</style>

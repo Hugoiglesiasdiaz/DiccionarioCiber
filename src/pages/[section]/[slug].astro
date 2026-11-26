@@ -1,0 +1,35 @@
+---
+/** Página de una entrada individual, generada desde su archivo Markdown. */
+import { render } from 'astro:content';
+import EntryLayout from '../../layouts/EntryLayout.astro';
+import { REQUIRED_SECTIONS } from '../../data/site';
+import { SECTION_IDS, getRaw, toEntry, type RawEntry } from '../../lib/entries';
+
+export async function getStaticPaths() {
+  const lists = await Promise.all(SECTION_IDS.map(getRaw));
+  return lists.flat().map((raw) => ({
+    params: { section: raw.collection, slug: raw.id },
+    props: { raw },
+  }));
+}
+
+const { raw } = Astro.props as { raw: RawEntry };
+const entry = toEntry(raw);
+const { Content, headings } = await render(raw);
+
+// El índice se construye con los títulos de nivel 2 (##).
+const toc = headings.filter((h) => h.depth === 2).map((h) => ({ id: h.slug, label: h.text }));
+
+// Aviso en el build si la entrada no sigue su plantilla.
+const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const missing = REQUIRED_SECTIONS[entry.section].filter(
+  (req) => !toc.some((t) => normalize(t.label).startsWith(normalize(req))),
+);
+if (missing.length > 0) {
+  console.warn(`[plantilla] ${raw.filePath}: faltan las secciones ${missing.map((m) => `"## ${m}"`).join(', ')}`);
+}
+---
+
+<EntryLayout entry={entry} toc={toc}>
+  <Content />
+</EntryLayout>

@@ -1,0 +1,247 @@
+---
+/**
+ * Cabecera fija con logo y navegación.
+ * - Escritorio: navegación horizontal en la propia cabecera.
+ * - Móvil: la navegación pasa a una barra inferior fija (más cómoda con el pulgar).
+ */
+import Icon from './Icon.astro';
+import { NAV, SITE } from '../data/site';
+import { isActive, url } from '../lib/url';
+
+const current = Astro.url.pathname;
+---
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="logo" href={url('/')} aria-label={`${SITE.name}, inicio`}>
+      <span class="logo__user">root@ciber</span><span class="logo__sep">:</span><span
+        class="logo__path">{SITE.handle}</span
+      ><span class="logo__caret">$</span>
+    </a>
+
+    <nav class="nav" aria-label="Principal">
+      <ul>
+        {
+          NAV.filter((item) => item.icon !== 'search').map((item) => (
+            <li>
+              <a href={url(item.href)} aria-current={isActive(current, item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <a class="header__search" href={url('/buscar/')} aria-label="Buscar">
+      <Icon name="search" size={18} />
+      <span class="header__search-text">Buscar</span>
+      <kbd class="header__kbd">/</kbd>
+    </a>
+  </div>
+</header>
+
+<nav class="bottom-nav" aria-label="Principal (móvil)">
+  <ul>
+    {
+      NAV.map((item) => (
+        <li>
+          <a href={url(item.href)} aria-current={isActive(current, item.href) ? 'page' : undefined}>
+            <Icon name={item.icon} size={22} />
+            <span>{item.short ?? item.label}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<script>
+  // Atajo de teclado "/" para ir al buscador (como en GitHub o MDN).
+  document.addEventListener('keydown', (event) => {
+    const target = event.target as HTMLElement;
+    const typing = target.closest('input, textarea, select, [contenteditable="true"]');
+    if (event.key !== '/' || typing || event.metaKey || event.ctrlKey) return;
+
+    const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+    event.preventDefault();
+    if (input) input.focus();
+    else window.location.href = document.querySelector<HTMLAnchorElement>('.header__search')!.href;
+  });
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+    background: rgb(9 13 18 / 0.82);
+    backdrop-filter: blur(10px);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    height: var(--header-h);
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: baseline;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .logo__user {
+    color: var(--green);
+  }
+
+  .logo__sep {
+    color: var(--muted);
+  }
+
+  .logo__path {
+    color: var(--cyan);
+  }
+
+  .logo__caret {
+    margin-left: 0.4ch;
+    color: var(--text);
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .nav ul {
+    display: flex;
+    gap: var(--space-1);
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav a {
+    display: block;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    text-decoration: none;
+  }
+
+  .nav a:hover {
+    color: var(--text);
+    background: var(--surface);
+  }
+
+  .nav a[aria-current='page'] {
+    color: var(--green);
+  }
+
+  .nav a[aria-current='page']::before {
+    content: './';
+    color: var(--faint);
+  }
+
+  .header__search {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
+    padding: 0.4rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .header__search:hover {
+    color: var(--text);
+  }
+
+  .header__search-text,
+  .header__kbd {
+    display: none;
+  }
+
+  /* Barra inferior (solo móvil) */
+  .bottom-nav {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    border-top: 1px solid var(--border);
+    background: rgb(13 18 24 / 0.94);
+    backdrop-filter: blur(10px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .bottom-nav ul {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: var(--bottom-nav-h);
+    padding: 0;
+    list-style: none;
+  }
+
+  .bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    height: 100%;
+    color: var(--faint);
+    /* Sans en vez de mono: "Herramientas" cabe en 1/5 de 320px */
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .bottom-nav a[aria-current='page'] {
+    color: var(--green);
+  }
+
+  .bottom-nav a[aria-current='page'] :global(svg) {
+    filter: drop-shadow(0 0 6px rgb(74 222 128 / 0.5));
+  }
+
+  @media (min-width: 48rem) {
+    .nav {
+      display: block;
+    }
+
+    .bottom-nav {
+      display: none;
+    }
+
+    .header__search {
+      min-width: 12rem;
+      padding: 0.35rem 0.6rem;
+      border-color: var(--border);
+      background: var(--surface);
+      font-size: var(--fs-sm);
+    }
+
+    .header__search:hover {
+      border-color: var(--border-strong);
+    }
+
+    .header__search-text {
+      display: inline;
+      font-family: var(--font-mono);
+    }
+
+    .header__kbd {
+      display: inline;
+      margin-left: auto;
+    }
+  }
+</style>

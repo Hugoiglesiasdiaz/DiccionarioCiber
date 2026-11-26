@@ -1,0 +1,216 @@
+---
+/** Inicio: presentación del proyecto, accesos a las secciones y últimas entradas. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EntryCard from '../components/EntryCard.astro';
+import Icon from '../components/Icon.astro';
+import { CATEGORIES, SECTIONS, SITE } from '../data/site';
+import { SECTION_IDS, getAllEntries } from '../lib/entries';
+import { url } from '../lib/url';
+
+const ENTRIES = await getAllEntries();
+
+const sectionCards = SECTION_IDS.map((id) => ({
+  id,
+  ...SECTIONS[id],
+  count: ENTRIES.filter((e) => e.section === id).length,
+  icon: ({ herramientas: 'tool', writeups: 'flag', apuntes: 'book' } as const)[id],
+}));
+
+// Solo se muestran las categorías que ya tienen contenido.
+const categoryCounts = CATEGORIES.map((c) => ({
+  ...c,
+  count: ENTRIES.filter((e) => e.category === c.id).length,
+})).filter((c) => c.count > 0);
+---
+
+<BaseLayout>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <p class="eyebrow">// {SITE.tagline}</p>
+        <h1 class="hero__title">
+          Herramientas, comandos y conceptos de <span class="hero__name">ciberseguridad</span>, a
+          mano.
+        </h1>
+        <p class="hero__lead">
+          Fichas de herramientas, writeups de laboratorios y apuntes, pensados para consultarlos
+          rápido desde el móvil.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href={url('/buscar/')}>
+            <Icon name="search" size={16} /> Buscar un comando
+          </a>
+          <a class="btn" href={url('/herramientas/')}>Ver herramientas</a>
+        </div>
+      </div>
+
+      <div class="terminal hero__terminal" aria-hidden="true">
+        <div class="terminal__bar">
+          <span class="terminal__dot"></span><span class="terminal__dot"></span><span class="terminal__dot"></span>
+          <span class="terminal__title">bash — 80×24</span>
+        </div>
+        <div class="terminal__body">
+          <p class="cmd">cat README</p>
+          <p class="out">apuntes de ciberseguridad · consulta rápida</p>
+          <p class="cmd">ls ~/ciber</p>
+          <p class="out">
+            <span style="color: var(--cyan)">herramientas/</span>&nbsp;
+            <span style="color: var(--cyan)">writeups/</span>&nbsp;
+            <span style="color: var(--cyan)">apuntes/</span>
+          </p>
+          <p class="cmd">grep -ri "volatility" .</p>
+          <p class="out">herramientas/volatility.md: <span style="color: var(--green)">windows.pslist</span></p>
+          <p class="cmd"><span class="cursor"></span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <!-- Accesos a secciones -->
+    <section class="section" aria-labelledby="secciones">
+      <div class="section-title">
+        <h2 id="secciones" class="hash">Explorar</h2>
+      </div>
+      <div class="grid grid--3">
+        {
+          sectionCards.map((s) => (
+            <article class="card card--link section-card">
+              <span class="section-card__icon">
+                <Icon name={s.icon} size={22} />
+              </span>
+              <h3>
+                <a class="card__link" href={url(s.href)}>{s.label}</a>
+              </h3>
+              <p class="muted">{s.intro}</p>
+              <span class="section-card__count mono">{s.count} entradas →</span>
+            </article>
+          ))
+        }
+      </div>
+
+      <ul class="cat-strip" aria-label="Entradas por categoría">
+        {
+          categoryCounts.map((c) => (
+            <li style={`--c: ${c.color}`}>
+              <span class="cat-strip__label">{c.label}</span>
+              <span class="cat-strip__count">{c.count}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Últimas entradas -->
+    <section class="section" aria-labelledby="recientes">
+      <div class="section-title">
+        <h2 id="recientes" class="hash">Últimas entradas</h2>
+        <a href={url('/herramientas/')}>ver todo →</a>
+      </div>
+      <div class="grid grid--3">
+        {ENTRIES.slice(0, 6).map((entry) => <EntryCard entry={entry} showSection />)}
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .hero {
+    border-bottom: 1px solid var(--border);
+    background-image:
+      linear-gradient(rgb(30 42 55 / 0.35) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(30 42 55 / 0.35) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: linear-gradient(to bottom, #000 70%, transparent);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: var(--space-6);
+    padding-block: var(--space-7);
+  }
+
+  .hero__text {
+    display: grid;
+    gap: var(--space-4);
+    align-content: center;
+  }
+
+  .hero__title {
+    font-size: clamp(1.75rem, 1.2rem + 2vw, 2.6rem);
+  }
+
+  .hero__name {
+    color: var(--green);
+  }
+
+  .hero__lead {
+    max-width: 52ch;
+    color: var(--muted);
+    font-size: var(--fs-lg);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  @media (min-width: 64rem) {
+    .hero__inner {
+      grid-template-columns: 1.2fr 1fr;
+      gap: var(--space-7);
+      padding-block: var(--space-8);
+    }
+  }
+
+  .section-card__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--green-dim);
+    border-radius: var(--radius);
+    background: rgb(74 222 128 / 0.08);
+    color: var(--green);
+  }
+
+  .section-card p {
+    flex: 1;
+    font-size: var(--fs-sm);
+  }
+
+  .section-card__count {
+    color: var(--cyan);
+    font-size: var(--fs-xs);
+  }
+
+  .cat-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+
+  .cat-strip li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--c);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+  }
+
+  .cat-strip__count {
+    color: var(--faint);
+  }
+
+</style>

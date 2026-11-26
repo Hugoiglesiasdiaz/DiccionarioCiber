@@ -1,0 +1,118 @@
+---
+/**
+ * Layout raíz: <head>, cabecera, pie y mejoras globales
+ * (botón de copiar en los bloques de código).
+ */
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+const fullTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} · ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#090d12" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      /**
+       * Envuelve cada <pre> del contenido en un bloque con etiqueta de lenguaje
+       * y botón "copiar". Así funciona igual con HTML escrito a mano que con
+       * el Markdown renderizado más adelante.
+       */
+      function enhanceCodeBlocks() {
+        document.querySelectorAll<HTMLPreElement>('.prose pre:not([data-enhanced])').forEach((pre) => {
+          pre.dataset.enhanced = '';
+          const wrapper = document.createElement('div');
+          wrapper.className = 'code-block';
+          pre.replaceWith(wrapper);
+          wrapper.append(pre);
+
+          // Shiki indica el lenguaje en data-language. "text" se muestra como "salida".
+          const lang = pre.dataset.language;
+          const isOutput = !lang || ['text', 'txt', 'plaintext'].includes(lang);
+          const isShell = ['bash', 'sh', 'shell', 'zsh', 'console', 'powershell', 'ps1'].includes(lang ?? '');
+          const label = document.createElement('span');
+          label.className = 'code-block__lang';
+          label.textContent = isOutput ? 'salida' : lang;
+          wrapper.append(label);
+
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'code-block__copy';
+          button.textContent = 'copiar';
+          button.addEventListener('click', async () => {
+            let text = pre.innerText;
+            // En comandos se omiten las líneas de comentario y el prompt "$ ".
+            if (isShell) {
+              text = text
+                .split('\n')
+                .filter((line) => !line.trimStart().startsWith('#'))
+                .map((line) => line.replace(/^\$ /, ''))
+                .join('\n')
+                .replace(/\n{2,}/g, '\n');
+            }
+            await navigator.clipboard.writeText(text.trim());
+            button.textContent = 'copiado ✓';
+            button.dataset.copied = '';
+            setTimeout(() => {
+              button.textContent = 'copiar';
+              delete button.dataset.copied;
+            }, 1600);
+          });
+          wrapper.append(button);
+        });
+      }
+
+      enhanceCodeBlocks();
+    </script>
+
+    <style>
+      .skip-link {
+        position: absolute;
+        top: -100px;
+        left: var(--space-4);
+        z-index: 100;
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius);
+        background: var(--green);
+        color: #04140a;
+        font-family: var(--font-mono);
+      }
+
+      .skip-link:focus {
+        top: var(--space-2);
+      }
+    </style>
+  </body>
+</html>

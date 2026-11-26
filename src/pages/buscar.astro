@@ -1,0 +1,38 @@
+---
+/** Página de búsqueda: monta la isla de React con los datos ya serializados. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchApp, { type SearchDoc } from '../components/search/SearchApp';
+import { CATEGORIES, SECTIONS, type SectionId } from '../data/site';
+import { getAllEntries } from '../lib/entries';
+
+const docs: SearchDoc[] = (await getAllEntries()).map((e) => ({
+  slug: e.slug,
+  section: e.section,
+  sectionLabel: SECTIONS[e.section].label,
+  title: e.title,
+  category: e.category,
+  tags: e.tags,
+  description: e.description,
+  href: e.href,
+}));
+
+const categories = CATEGORIES.map((c) => ({ id: c.id, label: c.label, color: c.color }));
+const sections = (Object.keys(SECTIONS) as SectionId[]).map((id) => ({ id, label: SECTIONS[id].label }));
+---
+
+<BaseLayout title="Buscar" description="Busca herramientas, comandos, writeups y apuntes.">
+  <div class="container page search-page">
+    <header class="page-header">
+      <p class="eyebrow">~/buscar · pulsa <kbd>/</kbd> en cualquier página</p>
+      <h1 class="prompt">grep -ri</h1>
+    </header>
+
+    <SearchApp client:load docs={docs} categories={categories} sections={sections} />
+  </div>
+</BaseLayout>
+
+<style>
+  .search-page {
+    max-width: 52rem;
+  }
+</style>

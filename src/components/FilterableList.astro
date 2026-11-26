@@ -1,0 +1,90 @@
+---
+/**
+ * Listado de entradas con filtro por categoría.
+ * El HTML se genera completo en el build (funciona sin JS); el script solo
+ * oculta/muestra tarjetas al pulsar un chip.
+ */
+import EntryCard from './EntryCard.astro';
+import type { Entry } from '../lib/entries';
+import { CATEGORIES } from '../data/site';
+
+interface Props {
+  entries: Entry[];
+  emptyText?: string;
+}
+
+const { entries, emptyText = 'Todavía no hay entradas en esta sección.' } = Astro.props;
+
+// Solo se muestran las categorías que tienen entradas.
+const categories = CATEGORIES.map((c) => ({
+  ...c,
+  count: entries.filter((e) => e.category === c.id).length,
+})).filter((c) => c.count > 0);
+---
+
+<div class="filterable" data-filterable>
+  {
+    categories.length > 1 && (
+      <div class="chips" role="group" aria-label="Filtrar por categoría">
+        <button class="chip" type="button" aria-pressed="true" data-filter="all">
+          todas <span class="chip__count">{entries.length}</span>
+        </button>
+        {categories.map((c) => (
+          <button class="chip" type="button" aria-pressed="false" data-filter={c.id} style={`--c: ${c.color}`}>
+            {c.label.toLowerCase()} <span class="chip__count">{c.count}</span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    entries.length > 0 ? (
+      <div class="grid grid--3" data-list>
+        {entries.map((entry) => <EntryCard entry={entry} />)}
+      </div>
+    ) : (
+      <p class="empty">
+        <span>$ ls</span>
+        <span>{emptyText}</span>
+      </p>
+    )
+  }
+
+  <p class="muted mono filterable__status" aria-live="polite" data-status></p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-filterable]').forEach((root) => {
+    const chips = root.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const cards = root.querySelectorAll<HTMLElement>('[data-list] > [data-category]');
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const filter = chip.dataset.filter;
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+
+        let visible = 0;
+        cards.forEach((card) => {
+          const show = filter === 'all' || card.dataset.category === filter;
+          card.hidden = !show;
+          if (show) visible++;
+        });
+        status.textContent = filter === 'all' ? '' : `${visible} resultado${visible === 1 ? '' : 's'}`;
+      });
+    });
+  });
+</script>
+
+<style>
+  .filterable {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  .filterable__status:empty {
+    display: none;
+  }
+</style>

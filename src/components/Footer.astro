@@ -1,0 +1,92 @@
+---
+import Icon from './Icon.astro';
+import { SITE } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <p class="footer__note">
+      <span class="eyebrow">// aviso</span> Contenido con fines educativos. Los datos de las prácticas
+      (IPs, hashes, nombres) son ficticios. Usa estas herramientas solo en sistemas propios o con
+      autorización.
+    </p>
+
+    <div class="footer__bottom">
+      <span class="mono muted">© {year} {SITE.author}</span>
+      <ul class="footer__links">
+        {
+          SITE.links.portfolio && (
+            <li>
+              <a class="footer__portfolio mono" href={SITE.links.portfolio}>
+                portfolio <Icon name="arrow" size={14} />
+              </a>
+            </li>
+          )
+        }
+        <li>
+          <a href={SITE.links.github} aria-label="Código en GitHub"><Icon name="github" size={18} /></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: var(--space-5);
+    padding-block: var(--space-6);
+  }
+
+  .footer__note {
+    max-width: 70ch;
+    color: var(--muted);
+    font-size: var(--fs-sm);
+  }
+
+  .footer__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    font-size: var(--fs-sm);
+  }
+
+  .footer__links {
+    display: flex;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__links a {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+  }
+
+  .footer__links a.footer__portfolio {
+    display: inline-flex;
+    gap: 0.4rem;
+    width: auto;
+    padding-inline: 0.8rem;
+    font-size: var(--fs-sm);
+    text-decoration: none;
+  }
+
+  .footer__links a:hover {
+    color: var(--green);
+    border-color: var(--green-dim);
+  }
+</style>

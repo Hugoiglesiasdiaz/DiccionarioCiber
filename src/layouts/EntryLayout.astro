@@ -1,0 +1,261 @@
+---
+/**
+ * Layout de una entrada individual (ficha, writeup o apunte).
+ * - Móvil: índice como fila de chips desplazable bajo la cabecera.
+ * - Escritorio: índice lateral fijo que resalta la sección visible.
+ */
+import BaseLayout from './BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import type { Entry } from '../lib/entries';
+import { SECTIONS, getCategory, type TocItem } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  entry: Entry;
+  toc?: TocItem[];
+}
+
+const { entry, toc = [] } = Astro.props;
+const category = getCategory(entry.category);
+const section = SECTIONS[entry.section];
+const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<BaseLayout title={entry.title} description={entry.description}>
+  <div class="container page">
+    <nav class="crumbs mono" aria-label="Ruta">
+      <a href={url('/')}>~</a>
+      <span>/</span>
+      <a href={url(section.href)}>{entry.section}</a>
+      <span>/</span>
+      <span aria-current="page">{entry.slug}</span>
+    </nav>
+
+    <header class="entry-header">
+      <span class="badge" style={`--c: ${category.color}`}>{category.label}</span>
+      <h1>{entry.title}</h1>
+      <p class="entry-header__desc">{entry.description}</p>
+      <div class="entry-header__meta">
+        <ul class="tags" aria-label="Etiquetas">
+          {entry.tags.map((tag) => <li class="tag">{tag}</li>)}
+        </ul>
+        <span class="mono muted">actualizado: <time datetime={entry.updated}>{date}</time></span>
+      </div>
+    </header>
+
+    <div class="entry-body">
+      {
+        toc.length > 0 && (
+          <nav class="toc" aria-label="Índice">
+            <p class="toc__title mono">índice</p>
+            <ol class="toc__list">
+              {toc.map((item, i) => (
+                <li>
+                  <a href={`#${item.id}`} data-toc-link>
+                    <span class="toc__num">{String(i + 1).padStart(2, '0')}</span>
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+
+      <article class="prose">
+        <slot />
+      </article>
+    </div>
+
+    <a class="btn back" href={url(section.href)}>
+      <Icon name="arrow" size={16} class="back__icon" /> cd ../{entry.section}
+    </a>
+  </div>
+</BaseLayout>
+
+<script>
+  // Resalta en el índice la sección que se está leyendo.
+  const links = new Map<string, HTMLAnchorElement>();
+  document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]').forEach((a) => {
+    links.set(a.hash.slice(1), a);
+  });
+
+  if (links.size > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          links.forEach((a) => a.removeAttribute('aria-current'));
+          links.get(entry.target.id)?.setAttribute('aria-current', 'true');
+        });
+      },
+      { rootMargin: '-20% 0px -70% 0px' },
+    );
+    links.forEach((_, id) => {
+      const heading = document.getElementById(id);
+      if (heading) observer.observe(heading);
+    });
+  }
+</script>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35ch;
+    margin-bottom: var(--space-5);
+    color: var(--faint);
+    font-size: var(--fs-sm);
+  }
+
+  .crumbs a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--cyan);
+  }
+
+  .crumbs [aria-current] {
+    color: var(--green);
+  }
+
+  .entry-header {
+    display: grid;
+    gap: var(--space-3);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .entry-header h1 {
+    font-size: var(--fs-3xl);
+  }
+
+  .entry-header__desc {
+    max-width: 60ch;
+    color: var(--muted);
+    font-size: var(--fs-lg);
+  }
+
+  .entry-header__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-size: var(--fs-xs);
+  }
+
+  .entry-body {
+    display: grid;
+    /* minmax(0, 1fr) impide que un <pre> o una tabla ancha ensanchen la página */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  /* Índice: chips horizontales en móvil */
+  .toc {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 10;
+    margin-inline: calc(var(--space-4) * -1);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    background: rgb(9 13 18 / 0.92);
+    backdrop-filter: blur(8px);
+  }
+
+  .toc__title {
+    display: none;
+  }
+
+  .toc__list {
+    display: flex;
+    gap: var(--space-2);
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    scrollbar-width: none;
+  }
+
+  .toc__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toc__list a {
+    display: flex;
+    gap: 0.6ch;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .toc__list a[aria-current] {
+    border-color: var(--green-dim);
+    color: var(--green);
+  }
+
+  .toc__num {
+    color: var(--faint);
+  }
+
+  .back {
+    margin-top: var(--space-7);
+  }
+
+  .back :global(.back__icon) {
+    transform: scaleX(-1);
+  }
+
+  /* Escritorio: índice lateral */
+  @media (min-width: 64rem) {
+    .entry-body {
+      grid-template-columns: minmax(0, 1fr) 15rem;
+      gap: var(--space-7);
+      align-items: start;
+    }
+
+    .toc {
+      order: 2;
+      top: calc(var(--header-h) + var(--space-6));
+      margin: var(--space-6) 0 0;
+      padding: 0 0 0 var(--space-4);
+      border-bottom: 0;
+      border-left: 1px solid var(--border);
+      background: none;
+      backdrop-filter: none;
+    }
+
+    .toc__title {
+      display: block;
+      margin-bottom: var(--space-3);
+      color: var(--faint);
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .toc__list {
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .toc__list a {
+      padding: 0.25rem 0;
+      border: 0;
+      border-radius: 0;
+      font-size: var(--fs-sm);
+      white-space: normal;
+    }
+
+    .toc__list a:hover {
+      color: var(--text);
+    }
+  }
+</style>
