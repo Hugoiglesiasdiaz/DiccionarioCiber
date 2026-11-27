@@ -1,48 +1,66 @@
 ---
-/** Inicio: presentación del proyecto, accesos a las secciones y últimas entradas. */
+/**
+ * Inicio: buscador grande, terminal decorativa, accesos por asignatura y
+ * últimas notas.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EntryCard from '../components/EntryCard.astro';
 import Icon from '../components/Icon.astro';
-import { CATEGORIES, SECTIONS, SITE } from '../data/site';
-import { SECTION_IDS, getAllEntries } from '../lib/entries';
+import { ASIGNATURAS, SITE } from '../data/site';
+import { getAllEntries } from '../lib/entries';
 import { url } from '../lib/url';
 
 const ENTRIES = await getAllEntries();
 
-const sectionCards = SECTION_IDS.map((id) => ({
-  id,
-  ...SECTIONS[id],
-  count: ENTRIES.filter((e) => e.section === id).length,
-  icon: ({ herramientas: 'tool', writeups: 'flag', apuntes: 'book' } as const)[id],
-}));
+/** Una tarjeta por asignatura con el número de conceptos y casos. */
+const asignaturas = ASIGNATURAS.map((a) => {
+  const notas = ENTRIES.filter((e) => e.asignaturas.includes(a.id));
+  return {
+    ...a,
+    conceptos: notas.filter((e) => e.section === 'conceptos').length,
+    casos: notas.filter((e) => e.section === 'casos').length,
+    total: notas.length,
+    href: url(`/buscar/?asignatura=${a.id}`),
+  };
+});
 
-// Solo se muestran las categorías que ya tienen contenido.
-const categoryCounts = CATEGORIES.map((c) => ({
-  ...c,
-  count: ENTRIES.filter((e) => e.category === c.id).length,
-})).filter((c) => c.count > 0);
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 ---
 
 <BaseLayout>
-  <!-- Hero -->
+  <!-- Hero con buscador -->
   <section class="hero">
     <div class="container hero__inner">
       <div class="hero__text">
         <p class="eyebrow">// {SITE.tagline}</p>
         <h1 class="hero__title">
-          Herramientas, comandos y conceptos de <span class="hero__name">ciberseguridad</span>, a
+          Conceptos, herramientas y comandos de <span class="hero__name">ciberseguridad</span>, a
           mano.
         </h1>
+
+        <!-- Formulario normal: funciona sin JS y lleva a /buscar/?q=… -->
+        <form class="hero-search" action={url('/buscar/')} method="get" role="search">
+          <label for="hero-q" class="visually-hidden">Buscar en las notas</label>
+          <span class="hero-search__prompt" aria-hidden="true">❯</span>
+          <input
+            id="hero-q"
+            name="q"
+            type="search"
+            class="hero-search__input"
+            placeholder="nmap, cadena de custodia, --pid…"
+            autocomplete="off"
+            spellcheck="false"
+            data-search-input
+          />
+          <button class="hero-search__button" type="submit" aria-label="Buscar">
+            <Icon name="search" size={18} />
+          </button>
+        </form>
+
         <p class="hero__lead">
-          Fichas de herramientas, writeups de laboratorios y apuntes, pensados para consultarlos
-          rápido desde el móvil.
+          Lo que voy aprendiendo en el curso, organizado por asignatura. Pulsa <kbd>/</kbd> para
+          buscar desde cualquier página.
         </p>
-        <div class="hero__actions">
-          <a class="btn btn--primary" href={url('/buscar/')}>
-            <Icon name="search" size={16} /> Buscar un comando
-          </a>
-          <a class="btn" href={url('/herramientas/')}>Ver herramientas</a>
-        </div>
       </div>
 
       <div class="terminal hero__terminal" aria-hidden="true">
@@ -55,12 +73,11 @@ const categoryCounts = CATEGORIES.map((c) => ({
           <p class="out">apuntes de ciberseguridad · consulta rápida</p>
           <p class="cmd">ls ~/ciber</p>
           <p class="out">
-            <span style="color: var(--cyan)">herramientas/</span>&nbsp;
-            <span style="color: var(--cyan)">writeups/</span>&nbsp;
-            <span style="color: var(--cyan)">apuntes/</span>
+            <span style="color: var(--cyan)">conceptos/</span>&nbsp;
+            <span style="color: var(--cyan)">casos/</span>
           </p>
           <p class="cmd">grep -ri "volatility" .</p>
-          <p class="out">herramientas/volatility.md: <span style="color: var(--green)">windows.pslist</span></p>
+          <p class="out">conceptos/volatility.md: <span style="color: var(--green)">windows.pslist</span></p>
           <p class="cmd"><span class="cursor"></span></p>
         </div>
       </div>
@@ -68,51 +85,46 @@ const categoryCounts = CATEGORIES.map((c) => ({
   </section>
 
   <div class="container">
-    <!-- Accesos a secciones -->
-    <section class="section" aria-labelledby="secciones">
+    <!-- Accesos por asignatura -->
+    <section class="section" aria-labelledby="asignaturas">
       <div class="section-title">
-        <h2 id="secciones" class="hash">Explorar</h2>
+        <h2 id="asignaturas" class="hash">Asignaturas</h2>
       </div>
-      <div class="grid grid--3">
+      <ul class="grid grid--3 subjects">
         {
-          sectionCards.map((s) => (
-            <article class="card card--link section-card">
-              <span class="section-card__icon">
-                <Icon name={s.icon} size={22} />
-              </span>
-              <h3>
-                <a class="card__link" href={url(s.href)}>{s.label}</a>
+          asignaturas.map((a) => (
+            <li class={`card subject ${a.total > 0 ? 'card--link' : 'subject--empty'}`} style={`--c: ${a.color}`}>
+              <span class="subject__short mono">{a.corto}</span>
+              <h3 class="subject__name">
+                {a.total > 0 ? (
+                  <a class="card__link" href={a.href}>
+                    {a.nombre}
+                  </a>
+                ) : (
+                  a.nombre
+                )}
               </h3>
-              <p class="muted">{s.intro}</p>
-              <span class="section-card__count mono">{s.count} entradas →</span>
-            </article>
-          ))
-        }
-      </div>
-
-      <ul class="cat-strip" aria-label="Entradas por categoría">
-        {
-          categoryCounts.map((c) => (
-            <li style={`--c: ${c.color}`}>
-              <span class="cat-strip__label">{c.label}</span>
-              <span class="cat-strip__count">{c.count}</span>
+              <p class="subject__count mono">
+                {a.total > 0
+                  ? `${plural(a.conceptos, 'concepto', 'conceptos')} · ${plural(a.casos, 'caso', 'casos')} →`
+                  : 'sin notas todavía'}
+              </p>
             </li>
           ))
         }
       </ul>
     </section>
 
-    <!-- Últimas entradas -->
+    <!-- Últimas notas -->
     <section class="section" aria-labelledby="recientes">
       <div class="section-title">
-        <h2 id="recientes" class="hash">Últimas entradas</h2>
-        <a href={url('/herramientas/')}>ver todo →</a>
+        <h2 id="recientes" class="hash">Últimas notas</h2>
+        <a href={url('/conceptos/')}>ver todo →</a>
       </div>
       <div class="grid grid--3">
-        {ENTRIES.slice(0, 6).map((entry) => <EntryCard entry={entry} showSection />)}
+        {ENTRIES.slice(0, 6).map((entry) => <EntryCard entry={entry} />)}
       </div>
     </section>
-
   </div>
 </BaseLayout>
 
@@ -120,26 +132,29 @@ const categoryCounts = CATEGORIES.map((c) => ({
   .hero {
     border-bottom: 1px solid var(--border);
     background-image:
-      linear-gradient(rgb(30 42 55 / 0.35) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(30 42 55 / 0.35) 1px, transparent 1px);
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: 32px 32px;
     mask-image: linear-gradient(to bottom, #000 70%, transparent);
   }
 
   .hero__inner {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
-    padding-block: var(--space-7);
+    padding-block: var(--space-6) var(--space-7);
   }
 
   .hero__text {
     display: grid;
+    /* minmax(0, 1fr): el input no debe ensanchar la columna en el móvil */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-4);
     align-content: center;
   }
 
   .hero__title {
-    font-size: clamp(1.75rem, 1.2rem + 2vw, 2.6rem);
+    font-size: clamp(1.6rem, 1.1rem + 2vw, 2.4rem);
   }
 
   .hero__name {
@@ -149,14 +164,65 @@ const categoryCounts = CATEGORIES.map((c) => ({
   .hero__lead {
     max-width: 52ch;
     color: var(--muted);
-    font-size: var(--fs-lg);
   }
 
-  .hero__actions {
+  /* Buscador grande */
+  .hero-search {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-top: var(--space-2);
+    align-items: center;
+    gap: var(--space-2);
+    padding-left: var(--space-4);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    background: var(--input-bg);
+    box-shadow: var(--shadow);
+    transition:
+      border-color 0.15s var(--ease),
+      box-shadow 0.15s var(--ease);
+  }
+
+  .hero-search:focus-within {
+    border-color: var(--green);
+    box-shadow: var(--glow-green);
+  }
+
+  .hero-search__prompt {
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  .hero-search__input {
+    flex: 1;
+    min-width: 0;
+    height: 3.5rem;
+    border: 0;
+    outline: 0;
+    background: none;
+    color: var(--text-strong);
+    font-family: var(--font-mono);
+    font-size: max(1rem, var(--fs-lg));
+    caret-color: var(--green);
+  }
+
+  .hero-search__input::placeholder {
+    color: var(--faint);
+  }
+
+  .hero-search__button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: 0.35rem;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--green);
+    color: var(--on-accent);
+  }
+
+  .hero-search__button:hover {
+    background: var(--green-hover);
   }
 
   @media (min-width: 64rem) {
@@ -167,50 +233,38 @@ const categoryCounts = CATEGORIES.map((c) => ({
     }
   }
 
-  .section-card__icon {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border: 1px solid var(--green-dim);
-    border-radius: var(--radius);
-    background: rgb(74 222 128 / 0.08);
-    color: var(--green);
-  }
-
-  .section-card p {
-    flex: 1;
-    font-size: var(--fs-sm);
-  }
-
-  .section-card__count {
-    color: var(--cyan);
-    font-size: var(--fs-xs);
-  }
-
-  .cat-strip {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: var(--space-5);
+  /* Tarjetas de asignatura */
+  .subjects {
     padding: 0;
     list-style: none;
   }
 
-  .cat-strip li {
-    display: flex;
-    align-items: center;
+  .subject {
     gap: var(--space-2);
-    padding: 0.3rem 0.7rem;
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--c);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono);
+    border-top: 3px solid var(--c);
+  }
+
+  .subject__short {
+    color: var(--c);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+  }
+
+  .subject__name {
+    flex: 1;
+    font-size: var(--fs-lg);
+  }
+
+  .subject__count {
+    color: var(--muted);
     font-size: var(--fs-xs);
   }
 
-  .cat-strip__count {
-    color: var(--faint);
+  .subject--empty {
+    opacity: 0.55;
   }
 
+  .subject--empty .subject__name {
+    color: var(--muted);
+  }
 </style>

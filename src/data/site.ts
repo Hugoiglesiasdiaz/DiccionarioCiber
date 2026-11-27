@@ -1,5 +1,6 @@
 /**
- * Configuración global del sitio: identidad, navegación y categorías.
+ * Configuración global del sitio: identidad, navegación, secciones,
+ * asignaturas, filtros extra y tipos de nota.
  * Es el único sitio donde hay que tocar para cambiar estos valores.
  */
 
@@ -9,14 +10,15 @@ export const SITE = {
   handle: '~/ciber',
   tagline: 'Apuntes de ciberseguridad',
   author: 'Hugo Iglesias Díaz',
-  description:
-    'Fichas de herramientas, writeups y apuntes de ciberseguridad para consulta rápida.',
+  description: 'Conceptos, herramientas y casos prácticos de ciberseguridad para consulta rápida.',
   links: {
     github: 'https://github.com/Hugoiglesiasdiaz/DiccionarioCiber',
     /** Portfolio personal (proyecto aparte). Déjalo vacío ('') para ocultar el enlace. */
     portfolio: 'https://hugoiglesiasdiaz.es',
   },
 } as const;
+
+/* ---------- Navegación ---------- */
 
 export type IconName = 'home' | 'tool' | 'flag' | 'book' | 'search';
 
@@ -30,46 +32,72 @@ export interface NavItem {
 
 export const NAV: NavItem[] = [
   { href: '/', label: 'Inicio', icon: 'home' },
-  { href: '/herramientas/', label: 'Herramientas', short: 'Fichas', icon: 'tool' },
-  { href: '/writeups/', label: 'Writeups', icon: 'flag' },
-  { href: '/apuntes/', label: 'Apuntes', icon: 'book' },
+  { href: '/conceptos/', label: 'Conceptos', icon: 'book' },
+  { href: '/casos/', label: 'Casos prácticos', short: 'Casos', icon: 'flag' },
   { href: '/buscar/', label: 'Buscar', icon: 'search' },
 ];
 
-export const CATEGORIES = [
-  { id: 'forense', label: 'Forense', color: 'var(--cat-forense)' },
-  { id: 'redes', label: 'Redes', color: 'var(--cat-redes)' },
-  { id: 'pentesting', label: 'Pentesting', color: 'var(--cat-pentesting)' },
-  { id: 'hardening', label: 'Hardening', color: 'var(--cat-hardening)' },
-  { id: 'osint', label: 'OSINT', color: 'var(--cat-osint)' },
-  { id: 'cripto', label: 'Criptografía', color: 'var(--cat-cripto)' },
-] as const;
-
-export type CategoryId = (typeof CATEGORIES)[number]['id'];
-
-export function getCategory(id: CategoryId) {
-  return CATEGORIES.find((c) => c.id === id)!;
-}
+/* ---------- Secciones (una colección de contenido cada una) ---------- */
 
 export const SECTIONS = {
-  herramientas: {
-    label: 'Herramientas',
-    href: '/herramientas/',
-    intro: 'Fichas de consulta rápida: qué es cada herramienta, comandos habituales, ejemplos y errores típicos.',
+  conceptos: {
+    label: 'Conceptos',
+    href: '/conceptos/',
+    intro: 'Conceptos, técnicas y herramientas que voy aprendiendo, explicados para consultarlos rápido.',
   },
-  writeups: {
-    label: 'Writeups',
-    href: '/writeups/',
+  casos: {
+    label: 'Casos prácticos',
+    href: '/casos/',
     intro: 'Prácticas y laboratorios explicados paso a paso. Todos los datos son ficticios.',
-  },
-  apuntes: {
-    label: 'Apuntes',
-    href: '/apuntes/',
-    intro: 'Conceptos teóricos organizados por tema.',
   },
 } as const;
 
 export type SectionId = keyof typeof SECTIONS;
+
+/* ---------- Asignaturas (filtro principal; cada nota tiene al menos una) ---------- */
+
+export const ASIGNATURAS = [
+  { id: 'hacking', nombre: 'Hacking Ético', corto: 'Hacking ético', color: 'var(--asig-hacking)' },
+  { id: 'incidentes', nombre: 'Incidentes de Ciberseguridad', corto: 'Incidentes', color: 'var(--asig-incidentes)' },
+  { id: 'produccion', nombre: 'Puesta en Producción Segura', corto: 'Puesta en producción', color: 'var(--asig-produccion)' },
+  { id: 'forense', nombre: 'Análisis Forense Informático', corto: 'Forense', color: 'var(--asig-forense)' },
+  { id: 'normativa', nombre: 'Normativa de Ciberseguridad', corto: 'Normativa', color: 'var(--asig-normativa)' },
+  { id: 'bastionado', nombre: 'Bastionado de Sistemas y Redes', corto: 'Bastionado', color: 'var(--asig-bastionado)' },
+] as const;
+
+export type AsignaturaId = (typeof ASIGNATURAS)[number]['id'];
+
+export function getAsignatura(id: AsignaturaId) {
+  return ASIGNATURAS.find((a) => a.id === id)!;
+}
+
+/* ---------- Filtros extra (opcionales) ---------- */
+
+/**
+ * "Herramienta" también es un filtro extra, pero no se escribe en `extras`:
+ * se deduce de `tipo: herramienta`.
+ */
+export const EXTRAS = [
+  { id: 'herramienta', label: 'Herramienta' },
+  { id: 'comandos', label: 'Comandos' },
+  { id: 'linux', label: 'Linux' },
+  { id: 'windows', label: 'Windows' },
+] as const;
+
+export type ExtraId = (typeof EXTRAS)[number]['id'];
+
+/** Extras que se pueden escribir en el frontmatter (todos menos "herramienta"). */
+export const EXTRAS_FRONTMATTER = ['comandos', 'linux', 'windows'] as const;
+
+/* ---------- Tipos de nota y sus plantillas ---------- */
+
+export const TIPOS = {
+  concepto: { label: 'Concepto', section: 'conceptos' },
+  herramienta: { label: 'Herramienta', section: 'conceptos' },
+  caso: { label: 'Caso práctico', section: 'casos' },
+} as const;
+
+export type TipoId = keyof typeof TIPOS;
 
 export interface TocItem {
   id: string;
@@ -77,11 +105,12 @@ export interface TocItem {
 }
 
 /**
- * Secciones obligatorias (títulos ##) de cada tipo de entrada, en orden.
- * El build avisa si a una entrada le falta alguna. Ver plantillas/.
+ * Secciones obligatorias (títulos ##) de cada tipo de nota, en orden.
+ * El build avisa si a una nota le falta alguna. Ver plantillas/.
  */
-export const REQUIRED_SECTIONS: Record<SectionId, string[]> = {
-  herramientas: [
+export const REQUIRED_SECTIONS: Record<TipoId, string[]> = {
+  concepto: [],
+  herramienta: [
     'Qué es',
     'Para qué sirve',
     'Comandos habituales',
@@ -89,6 +118,5 @@ export const REQUIRED_SECTIONS: Record<SectionId, string[]> = {
     'Errores típicos',
     'Advertencias',
   ],
-  writeups: ['Contexto', 'Entorno', 'Desarrollo', 'Conclusiones'],
-  apuntes: [],
+  caso: ['Contexto', 'Entorno', 'Desarrollo', 'Conclusiones'],
 };

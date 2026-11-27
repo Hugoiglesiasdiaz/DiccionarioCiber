@@ -1,15 +1,61 @@
+# ---------------------------------------------------------------
 # Dependencias y salida del build
+# ---------------------------------------------------------------
 node_modules/
 dist/
 .astro/
 
-# Caché de modelos y embeddings
+# Cachés (Vite, modelos y embeddings de la futura búsqueda semántica)
 .cache/
+.vite/
 
-# Entorno y sistema
+# ---------------------------------------------------------------
+# Herramientas de IA y asistentes de código (configuración local)
+# ---------------------------------------------------------------
+.claude/
+CLAUDE.local.md
+.codegraph/
+.cursor/
+.aider*
+.continue/
+.copilot/
+
+# ---------------------------------------------------------------
+# Editores e IDE
+# ---------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ---------------------------------------------------------------
+# Entorno y secretos
+# ---------------------------------------------------------------
 .env
 .env.*
 !.env.example
+
+# ---------------------------------------------------------------
+# Hosting (carpetas locales de sus CLI)
+# ---------------------------------------------------------------
+.netlify/
+.vercel/
+.wrangler/
+
+# ---------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------------------------------------------
+# Sistema operativo
+# ---------------------------------------------------------------
 .DS_Store
 Thumbs.db
-*.log
+Desktop.ini

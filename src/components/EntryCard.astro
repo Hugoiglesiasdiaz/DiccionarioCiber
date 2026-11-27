@@ -1,38 +1,46 @@
 ---
-/** Tarjeta de una entrada (herramienta, writeup o apunte) en un listado. */
+/** Tarjeta de una nota (concepto, herramienta o caso práctico) en un listado. */
 import type { Entry } from '../lib/entries';
-import { SECTIONS, getCategory } from '../data/site';
+import { EXTRAS, TIPOS } from '../data/site';
+import AsignaturaBadges from './AsignaturaBadges.astro';
 
 interface Props {
   entry: Entry;
-  /** Muestra la sección (útil en listados mixtos como "Últimas entradas"). */
-  showSection?: boolean;
 }
 
-const { entry, showSection = false } = Astro.props;
-const category = getCategory(entry.category);
-const section = SECTIONS[entry.section];
-const href = entry.href;
+const { entry } = Astro.props;
 const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+// "Herramienta" ya se ve como tipo de nota; aquí solo el resto de extras.
+const extras = EXTRAS.filter((x) => x.id !== 'herramienta' && entry.extras.includes(x.id));
 ---
 
-<article class="card card--link entry" data-category={entry.category}>
+<article
+  class="card card--link entry"
+  data-asignaturas={entry.asignaturas.join(' ')}
+  data-extras={entry.extras.join(' ')}
+>
   <div class="entry__meta">
-    <span class="badge" style={`--c: ${category.color}`}>{category.label}</span>
-    {showSection && <span class="entry__section">{section.label.toLowerCase()}/</span>}
+    <span class={`entry__tipo entry__tipo--${entry.tipo}`}>{TIPOS[entry.tipo].label}</span>
+    <time class="entry__date" datetime={entry.updated}>{date}</time>
   </div>
 
   <h3 class="entry__title">
-    <a class="card__link" href={href}>{entry.title}</a>
+    <a class="card__link" href={entry.href}>{entry.title}</a>
   </h3>
 
   <p class="entry__desc">{entry.description}</p>
 
   <div class="entry__footer">
-    <ul class="tags" aria-label="Etiquetas">
-      {entry.tags.map((tag) => <li class="tag">{tag}</li>)}
-    </ul>
-    <time class="entry__date" datetime={entry.updated}>{date}</time>
+    <AsignaturaBadges ids={entry.asignaturas} />
+    {
+      extras.length > 0 && (
+        <ul class="tags" aria-label="Filtros extra">
+          {extras.map((x) => (
+            <li class="tag">{x.label}</li>
+          ))}
+        </ul>
+      )
+    }
   </div>
 </article>
 
@@ -42,12 +50,32 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
     align-items: center;
     justify-content: space-between;
     gap: var(--space-2);
-  }
-
-  .entry__section {
-    color: var(--faint);
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
+  }
+
+  .entry__tipo {
+    color: var(--faint);
+  }
+
+  .entry__tipo::before {
+    content: '[';
+  }
+
+  .entry__tipo::after {
+    content: ']';
+  }
+
+  .entry__tipo--herramienta {
+    color: var(--cyan);
+  }
+
+  .entry__tipo--caso {
+    color: var(--green);
+  }
+
+  .entry__date {
+    color: var(--faint);
   }
 
   .entry__title {
@@ -61,16 +89,7 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
   }
 
   .entry__footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
     gap: var(--space-2);
-  }
-
-  .entry__date {
-    color: var(--faint);
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
   }
 </style>

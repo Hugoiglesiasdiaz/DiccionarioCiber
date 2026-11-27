@@ -38,6 +38,12 @@ const current = Astro.url.pathname;
       <span class="header__search-text">Buscar</span>
       <kbd class="header__kbd">/</kbd>
     </a>
+
+    <!-- Se ve el icono del tema al que se cambia: sol en oscuro, luna en claro. -->
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Cambiar de tema">
+      <Icon name="sun" size={18} class="theme-toggle__sun" />
+      <Icon name="moon" size={18} class="theme-toggle__moon" />
+    </button>
   </div>
 </header>
 
@@ -68,6 +74,41 @@ const current = Astro.url.pathname;
     if (input) input.focus();
     else window.location.href = document.querySelector<HTMLAnchorElement>('.header__search')!.href;
   });
+
+  // Botón de tema claro / oscuro. El tema inicial lo pone el script del <head>.
+  type Theme = 'light' | 'dark';
+  const root = document.documentElement;
+  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]')!;
+  const systemLight = matchMedia('(prefers-color-scheme: light)');
+
+  function setTheme(theme: Theme) {
+    root.dataset.theme = theme;
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content =
+      theme === 'light' ? '#f6f8fa' : '#090d12';
+    toggle.setAttribute('aria-label', theme === 'light' ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro');
+    toggle.title = toggle.getAttribute('aria-label')!;
+  }
+
+  setTheme(root.dataset.theme === 'light' ? 'light' : 'dark');
+
+  toggle.addEventListener('click', () => {
+    const next: Theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      // Navegación privada o almacenamiento bloqueado: el cambio dura hasta recargar.
+    }
+  });
+
+  // Si nunca se ha elegido tema a mano, sigue los cambios del sistema en vivo.
+  systemLight.addEventListener('change', (event) => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem('theme');
+    } catch {}
+    if (!saved) setTheme(event.matches ? 'light' : 'dark');
+  });
 </script>
 
 <style>
@@ -76,7 +117,7 @@ const current = Astro.url.pathname;
     top: 0;
     z-index: 50;
     border-bottom: 1px solid var(--border);
-    background: rgb(9 13 18 / 0.82);
+    background: var(--bar-bg);
     backdrop-filter: blur(10px);
   }
 
@@ -171,20 +212,48 @@ const current = Astro.url.pathname;
     display: none;
   }
 
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--muted);
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+
+  .theme-toggle :global(.theme-toggle__moon),
+  :global(:root[data-theme='light']) .theme-toggle :global(.theme-toggle__sun) {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .theme-toggle :global(.theme-toggle__moon) {
+    display: block;
+  }
+
   /* Barra inferior (solo móvil) */
   .bottom-nav {
     position: fixed;
     inset: auto 0 0;
     z-index: 50;
     border-top: 1px solid var(--border);
-    background: rgb(13 18 24 / 0.94);
+    background: var(--bar-bg);
     backdrop-filter: blur(10px);
     padding-bottom: env(safe-area-inset-bottom);
   }
 
   .bottom-nav ul {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    /* Tantas columnas iguales como elementos tenga NAV */
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
     height: var(--bottom-nav-h);
     padding: 0;
     list-style: none;
@@ -210,7 +279,7 @@ const current = Astro.url.pathname;
   }
 
   .bottom-nav a[aria-current='page'] :global(svg) {
-    filter: drop-shadow(0 0 6px rgb(74 222 128 / 0.5));
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--green) 50%, transparent));
   }
 
   @media (min-width: 48rem) {

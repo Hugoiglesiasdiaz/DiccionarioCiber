@@ -19,7 +19,7 @@
   padding: 0 var(--space-4);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  background: #070a0e;
+  background: var(--input-bg);
   transition:
     border-color 0.15s var(--ease),
     box-shadow 0.15s var(--ease);
@@ -136,12 +136,17 @@
 
 .switch input:checked + .switch__track {
   border-color: var(--cyan);
-  background: rgb(34 211 238 / 0.18);
+  background: color-mix(in srgb, var(--cyan) 18%, transparent);
 }
 
 .switch input:checked + .switch__track .switch__thumb {
   transform: translateX(1.1rem);
   background: var(--cyan);
+}
+
+.switch--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .switch input:focus-visible + .switch__track {
@@ -207,6 +212,22 @@
   font-size: var(--fs-sm);
 }
 
+/* Fragmento del cuerpo donde aparece la coincidencia */
+.result__snippet {
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--border-strong);
+  background: var(--bg-soft);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.search__status {
+  color: var(--faint);
+}
+
 .result__meta {
   display: flex;
   flex-wrap: wrap;
@@ -217,6 +238,6 @@
 
 .result mark {
   border-radius: 2px;
-  background: rgb(74 222 128 / 0.22);
+  background: color-mix(in srgb, var(--green) 22%, transparent);
   color: var(--green);
 }

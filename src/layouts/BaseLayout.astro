@@ -12,11 +12,19 @@ import { url } from '../lib/url';
 interface Props {
   title?: string;
   description?: string;
+  /** "article" en las notas; el resto de páginas son "website". */
+  type?: 'website' | 'article';
+  /** Fecha de última actualización de una nota (YYYY-MM-DD). */
+  updated?: string;
+  /** Evita que los buscadores indexen la página (p. ej. la 404). */
+  noindex?: boolean;
 }
 
-const { title, description = SITE.description } = Astro.props;
+const { title, description = SITE.description, type = 'website', updated, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} · ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Las redes necesitan URLs absolutas para la imagen de vista previa.
+const ogImage = new URL(url('/og.png'), Astro.site);
 ---
 
 <!doctype html>
@@ -27,13 +35,46 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#090d12" />
+
+    <!--
+      Tema: se decide antes de pintar la página para que no haya un destello
+      del tema equivocado. Prioridad: elección guardada > preferencia del
+      sistema. El botón de la cabecera (Header.astro) cambia y guarda la elección.
+      is:inline: Astro no lo empaqueta ni lo aplaza, se ejecuta tal cual aquí.
+    -->
+    <script is:inline>
+      (() => {
+        let theme = null;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#f6f8fa' : '#090d12';
+      })();
+    </script>
+
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={url('/sitemap-index.xml')} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="author" content={SITE.author} />
 
-    <meta property="og:type" content="website" />
+    <!-- Vista previa al compartir (Open Graph y X/Twitter). Imagen: scripts/generar-og.mjs -->
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="es_ES" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${SITE.name}: ${SITE.tagline}`} />
+    {updated && <meta property="article:modified_time" content={updated} />}
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
 
   <body>
@@ -106,7 +147,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         padding: var(--space-2) var(--space-3);
         border-radius: var(--radius);
         background: var(--green);
-        color: #04140a;
+        color: var(--on-accent);
         font-family: var(--font-mono);
       }
 

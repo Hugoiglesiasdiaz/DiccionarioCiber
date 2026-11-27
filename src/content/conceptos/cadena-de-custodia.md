@@ -1,7 +1,8 @@
 ---
 titulo: Cadena de custodia
 descripcion: Cómo documentar una evidencia desde que se recoge hasta que se presenta para que conserve su validez.
-categoria: forense
+tipo: concepto
+asignaturas: [forense, normativa]
 etiquetas: [legal, evidencias, hash, documentación]
 actualizado: 2026-11-15
 ---

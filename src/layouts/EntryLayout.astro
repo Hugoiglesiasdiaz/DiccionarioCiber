@@ -1,27 +1,31 @@
 ---
 /**
- * Layout de una entrada individual (ficha, writeup o apunte).
+ * Layout de una nota individual (concepto, herramienta o caso práctico).
  * - Móvil: índice como fila de chips desplazable bajo la cabecera.
  * - Escritorio: índice lateral fijo que resalta la sección visible.
  */
 import BaseLayout from './BaseLayout.astro';
 import Icon from '../components/Icon.astro';
+import AsignaturaBadges from '../components/AsignaturaBadges.astro';
+import EntryCard from '../components/EntryCard.astro';
 import type { Entry } from '../lib/entries';
-import { SECTIONS, getCategory, type TocItem } from '../data/site';
+import { EXTRAS, SECTIONS, TIPOS, type TocItem } from '../data/site';
 import { url } from '../lib/url';
 
 interface Props {
   entry: Entry;
   toc?: TocItem[];
+  /** Otras notas que comparten asignatura (ver getRelated). */
+  related?: Entry[];
 }
 
-const { entry, toc = [] } = Astro.props;
-const category = getCategory(entry.category);
+const { entry, toc = [], related = [] } = Astro.props;
+const extras = EXTRAS.filter((x) => x.id !== 'herramienta' && entry.extras.includes(x.id));
 const section = SECTIONS[entry.section];
 const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 
-<BaseLayout title={entry.title} description={entry.description}>
+<BaseLayout title={entry.title} description={entry.description} type="article" updated={entry.updated}>
   <div class="container page">
     <nav class="crumbs mono" aria-label="Ruta">
       <a href={url('/')}>~</a>
@@ -32,13 +36,20 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
     </nav>
 
     <header class="entry-header">
-      <span class="badge" style={`--c: ${category.color}`}>{category.label}</span>
+      <p class={`entry-header__tipo entry-header__tipo--${entry.tipo}`}>[{TIPOS[entry.tipo].label}]</p>
       <h1>{entry.title}</h1>
       <p class="entry-header__desc">{entry.description}</p>
+      <AsignaturaBadges ids={entry.asignaturas} full />
       <div class="entry-header__meta">
-        <ul class="tags" aria-label="Etiquetas">
-          {entry.tags.map((tag) => <li class="tag">{tag}</li>)}
-        </ul>
+        {
+          extras.length > 0 && (
+            <ul class="tags" aria-label="Filtros extra">
+              {extras.map((x) => (
+                <li class="tag">{x.label}</li>
+              ))}
+            </ul>
+          )
+        }
         <span class="mono muted">actualizado: <time datetime={entry.updated}>{date}</time></span>
       </div>
     </header>
@@ -66,6 +77,21 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
         <slot />
       </article>
     </div>
+
+    {
+      related.length > 0 && (
+        <section class="related" aria-labelledby="relacionadas">
+          <h2 id="relacionadas" class="hash related__title">
+            Notas relacionadas
+          </h2>
+          <div class="grid grid--3">
+            {related.map((r) => (
+              <EntryCard entry={r} />
+            ))}
+          </div>
+        </section>
+      )
+    }
 
     <a class="btn back" href={url(section.href)}>
       <Icon name="arrow" size={16} class="back__icon" /> cd ../{entry.section}
@@ -128,6 +154,20 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
     border-bottom: 1px solid var(--border);
   }
 
+  .entry-header__tipo {
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+  }
+
+  .entry-header__tipo--herramienta {
+    color: var(--cyan);
+  }
+
+  .entry-header__tipo--caso {
+    color: var(--green);
+  }
+
   .entry-header h1 {
     font-size: var(--fs-3xl);
   }
@@ -162,7 +202,7 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
     margin-inline: calc(var(--space-4) * -1);
     padding: var(--space-2) var(--space-4);
     border-bottom: 1px solid var(--border);
-    background: rgb(9 13 18 / 0.92);
+    background: var(--bar-bg);
     backdrop-filter: blur(8px);
   }
 
@@ -203,6 +243,16 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
 
   .toc__num {
     color: var(--faint);
+  }
+
+  .related {
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px dashed var(--border);
+  }
+
+  .related__title {
+    margin-bottom: var(--space-5);
   }
 
   .back {

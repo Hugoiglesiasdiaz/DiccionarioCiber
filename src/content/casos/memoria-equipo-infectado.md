@@ -1,8 +1,10 @@
 ---
-titulo: "Lab: análisis de memoria de un equipo infectado"
+titulo: Análisis de memoria de un equipo infectado
 descripcion: Identificación del proceso malicioso, su conexión de mando y control y su persistencia a partir de un volcado de RAM.
-categoria: forense
-etiquetas: [volatility, malware, memoria, lab]
+tipo: caso
+asignaturas: [forense, incidentes]
+extras: [comandos, windows]
+etiquetas: [volatility, malware, memoria, laboratorio]
 actualizado: 2026-11-24
 ---
 

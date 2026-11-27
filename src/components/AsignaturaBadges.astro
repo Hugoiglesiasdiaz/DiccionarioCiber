@@ -1,0 +1,35 @@
+---
+/** Insignias de color con las asignaturas de una nota. */
+import { getAsignatura, type AsignaturaId } from '../data/site';
+
+interface Props {
+  ids: AsignaturaId[];
+  /** Nombre completo en lugar del corto (p. ej. en la cabecera de una nota). */
+  full?: boolean;
+}
+
+const { ids, full = false } = Astro.props;
+---
+
+<ul class="badges" aria-label="Asignaturas">
+  {
+    ids.map((id) => {
+      const a = getAsignatura(id);
+      return (
+        <li class="badge" style={`--c: ${a.color}`} title={a.nombre}>
+          {full ? a.nombre : a.corto}
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+</style>

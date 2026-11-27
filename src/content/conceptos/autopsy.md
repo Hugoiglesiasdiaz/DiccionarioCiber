@@ -1,7 +1,9 @@
 ---
 titulo: Autopsy
 descripcion: Plataforma gráfica de análisis forense de discos e imágenes, construida sobre The Sleuth Kit.
-categoria: forense
+tipo: herramienta
+asignaturas: [forense]
+extras: [comandos, windows, linux]
 etiquetas: [disco, timeline, gui, sleuthkit]
 actualizado: 2026-11-20
 ---

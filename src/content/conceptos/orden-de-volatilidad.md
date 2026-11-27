@@ -1,7 +1,8 @@
 ---
 titulo: Orden de volatilidad
 descripcion: Qué evidencias recoger primero y por qué, según las recomendaciones de la RFC 3227.
-categoria: forense
+tipo: concepto
+asignaturas: [forense, incidentes]
 etiquetas: [rfc3227, adquisición, evidencias]
 actualizado: 2026-11-21
 ---
@@ -43,4 +44,4 @@ Archiving*), que propone este orden aproximado.
 
 Recoger en orden inverso a la duración de la evidencia, documentando cada paso y
 minimizando los cambios en el sistema. Relacionado: [Cadena de custodia](../cadena-de-custodia/)
-y [Volatility 3](../../herramientas/volatility/) para analizar la RAM adquirida.
+y [Volatility 3](../volatility/) para analizar la RAM adquirida.

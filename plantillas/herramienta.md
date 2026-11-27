@@ -1,10 +1,15 @@
 ---
-# Copia este archivo a src/content/herramientas/<slug>.md
-# El nombre del archivo es la URL: nmap.md → /herramientas/nmap/
+# Copia este archivo a src/content/conceptos/<slug>.md
+# El nombre del archivo es la URL: nmap.md → /conceptos/nmap/
 titulo: Nombre de la herramienta
-descripcion: Una frase (máx. 200 caracteres) que aparece en tarjetas y resultados de búsqueda.
-categoria: forense # forense | redes | pentesting | hardening | osint | cripto
-etiquetas: [etiqueta1, etiqueta2]
+descripcion: Una frase (máx. 200 caracteres) que aparece en las tarjetas y en el buscador.
+tipo: herramienta
+# Al menos una: hacking | incidentes | produccion | forense | normativa | bastionado
+asignaturas: [forense]
+# Opcional: comandos | linux | windows ("herramienta" se añade sola)
+extras: [comandos, linux]
+# Opcional: palabras clave extra para el buscador
+etiquetas: []
 actualizado: 2026-01-01
 borrador: true # quítalo (o pon false) para publicarla
 ---

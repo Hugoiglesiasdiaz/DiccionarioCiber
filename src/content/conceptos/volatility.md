@@ -1,7 +1,9 @@
 ---
 titulo: Volatility 3
 descripcion: Framework para extraer artefactos (procesos, conexiones, código inyectado…) de volcados de memoria RAM.
-categoria: forense
+tipo: herramienta
+asignaturas: [forense, incidentes]
+extras: [comandos, windows, linux]
 etiquetas: [memoria, ram, malware, cli]
 actualizado: 2026-11-22
 ---

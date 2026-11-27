@@ -1,7 +1,9 @@
 ---
 titulo: PhotoRec
 descripcion: Recuperación de archivos borrados mediante file carving, sin depender del sistema de ficheros.
-categoria: forense
+tipo: herramienta
+asignaturas: [forense]
+extras: [comandos, linux, windows]
 etiquetas: [carving, recuperación, cli, testdisk]
 actualizado: 2026-11-18
 ---

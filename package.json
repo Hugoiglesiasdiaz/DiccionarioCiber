@@ -2,7 +2,7 @@
   "name": "diccionario-ciber",
   "version": "0.1.0",
   "private": true,
-  "description": "Web personal de apuntes de ciberseguridad y portfolio.",
+  "description": "Cuaderno de apuntes de ciberseguridad: conceptos, herramientas y casos prácticos.",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"
@@ -16,8 +16,10 @@
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.10",
     "@astrojs/react": "^5.0.7",
+    "@astrojs/sitemap": "^3.7.6",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "astro": "^6.4.8",
+    "minisearch": "^7.2.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

@@ -1,0 +1,59 @@
+# Publica la web en GitHub Pages cada vez que se sube algo a `main`
+# (también se puede lanzar a mano desde la pestaña Actions).
+#
+# Antes de la primera vez: Settings → Pages → Source: "GitHub Actions".
+#
+# Dirección de la web (variables opcionales en Settings → Secrets and
+# variables → Actions → Variables):
+#   - Sin variables: https://<usuario>.github.io/<repositorio>/
+#   - Con dominio propio: SITE_URL=https://apuntes.ejemplo.es y BASE_PATH=/
+#     (y el dominio configurado en Settings → Pages → Custom domain).
+name: Desplegar en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un solo despliegue a la vez; si llega otro, el que está en curso termina.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compilar
+        run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io', github.repository_owner) }}
+          BASE_PATH: ${{ vars.BASE_PATH || format('/{0}', github.event.repository.name) }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

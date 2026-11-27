@@ -1,39 +1,91 @@
 ---
 /**
- * Listado de entradas con filtro por categoría.
- * El HTML se genera completo en el build (funciona sin JS); el script solo
- * oculta/muestra tarjetas al pulsar un chip.
+ * Listado de notas con filtros combinables por grupos.
+ *
+ * - Grupos: Asignatura y Extras. Cada nota puede tener varios valores.
+ * - Dentro de un grupo se suman (Forense O Incidentes); entre grupos se
+ *   exigen todos (Forense Y Linux).
+ * - El estado se guarda en la URL: ?asignatura=forense,incidentes&extra=linux
+ *   para poder enlazar un listado ya filtrado.
+ *
+ * El HTML se genera completo en el build (sin JS se ven todas las notas);
+ * el script solo oculta tarjetas.
  */
 import EntryCard from './EntryCard.astro';
 import type { Entry } from '../lib/entries';
-import { CATEGORIES } from '../data/site';
+import { ASIGNATURAS, EXTRAS } from '../data/site';
 
 interface Props {
   entries: Entry[];
   emptyText?: string;
 }
 
-const { entries, emptyText = 'Todavía no hay entradas en esta sección.' } = Astro.props;
+const { entries, emptyText = 'Todavía no hay notas en esta sección.' } = Astro.props;
 
-// Solo se muestran las categorías que tienen entradas.
-const categories = CATEGORIES.map((c) => ({
-  ...c,
-  count: entries.filter((e) => e.category === c.id).length,
-})).filter((c) => c.count > 0);
+// Solo se ofrecen los filtros que tienen alguna nota.
+const groups = [
+  {
+    id: 'asignatura',
+    label: 'Asignatura',
+    options: ASIGNATURAS.map((a) => ({
+      id: a.id,
+      label: a.corto,
+      title: a.nombre,
+      color: a.color,
+      count: entries.filter((e) => e.asignaturas.includes(a.id)).length,
+    })),
+  },
+  {
+    id: 'extra',
+    label: 'Extras',
+    options: EXTRAS.map((x) => ({
+      id: x.id,
+      label: x.label,
+      title: x.label,
+      color: 'var(--cyan)',
+      count: entries.filter((e) => e.extras.includes(x.id)).length,
+    })),
+  },
+]
+  .map((g) => ({ ...g, options: g.options.filter((o) => o.count > 0) }))
+  .filter((g) => g.options.length > 0);
 ---
 
-<div class="filterable" data-filterable>
+<div class="filterable" data-filterable data-total={entries.length}>
   {
-    categories.length > 1 && (
-      <div class="chips" role="group" aria-label="Filtrar por categoría">
-        <button class="chip" type="button" aria-pressed="true" data-filter="all">
-          todas <span class="chip__count">{entries.length}</span>
-        </button>
-        {categories.map((c) => (
-          <button class="chip" type="button" aria-pressed="false" data-filter={c.id} style={`--c: ${c.color}`}>
-            {c.label.toLowerCase()} <span class="chip__count">{c.count}</span>
-          </button>
+    entries.length > 1 && groups.length > 0 && (
+      <div class="filters">
+        {groups.map((g) => (
+          <div class="filters__group">
+            <span class="filters__label mono" id={`filtro-${g.id}`}>
+              {g.label.toLowerCase()}:
+            </span>
+            <div class="chips" role="group" aria-labelledby={`filtro-${g.id}`}>
+              {g.options.map((o) => (
+                <button
+                  class="chip"
+                  type="button"
+                  aria-pressed="false"
+                  data-group={g.id}
+                  data-value={o.id}
+                  style={`--c: ${o.color}`}
+                  title={o.title}
+                >
+                  {o.label} <span class="chip__count">{o.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
+
+        <div class="filters__summary">
+          <p class="mono muted" aria-live="polite" data-status>
+            {entries.length} {entries.length === 1 ? 'nota' : 'notas'}
+          </p>
+          <button class="filters__clear mono" type="button" data-clear hidden>
+            limpiar filtros ✕
+          </button>
+        </div>
       </div>
     )
   }
@@ -51,29 +103,90 @@ const categories = CATEGORIES.map((c) => ({
     )
   }
 
-  <p class="muted mono filterable__status" aria-live="polite" data-status></p>
+  <p class="empty" data-no-results hidden>
+    <span>$ ls | grep …</span>
+    <span>Ninguna nota cumple todos los filtros. Prueba a quitar alguno.</span>
+  </p>
 </div>
 
 <script>
+  type Group = 'asignatura' | 'extra';
+  const GROUPS: Group[] = ['asignatura', 'extra'];
+
   document.querySelectorAll<HTMLElement>('[data-filterable]').forEach((root) => {
-    const chips = root.querySelectorAll<HTMLButtonElement>('[data-filter]');
-    const cards = root.querySelectorAll<HTMLElement>('[data-list] > [data-category]');
-    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-group]')];
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-list] > [data-asignaturas]')];
+    const status = root.querySelector<HTMLElement>('[data-status]');
+    const clear = root.querySelector<HTMLButtonElement>('[data-clear]');
+    const noResults = root.querySelector<HTMLElement>('[data-no-results]')!;
+    const total = Number(root.dataset.total);
+    if (chips.length === 0) return;
+
+    // Estado inicial desde la URL (ignora valores que no existen en esta página).
+    const params = new URLSearchParams(window.location.search);
+    const available = (g: Group) => new Set(chips.filter((c) => c.dataset.group === g).map((c) => c.dataset.value!));
+    const state: Record<Group, Set<string>> = {
+      asignatura: new Set(),
+      extra: new Set(),
+    };
+    for (const g of GROUPS) {
+      const valid = available(g);
+      params.get(g)?.split(',').forEach((v) => valid.has(v) && state[g].add(v));
+    }
+
+    /** Valores de una tarjeta para un grupo (atributos data-asignaturas / data-extras). */
+    const valuesOf = (card: HTMLElement, g: Group) =>
+      (g === 'asignatura' ? card.dataset.asignaturas : card.dataset.extras)?.split(' ').filter(Boolean) ?? [];
+
+    function apply() {
+      let visible = 0;
+      for (const card of cards) {
+        // Entre grupos: Y. Dentro de un grupo: O.
+        const show = GROUPS.every((g) => state[g].size === 0 || valuesOf(card, g).some((v) => state[g].has(v)));
+        card.hidden = !show;
+        if (show) visible++;
+      }
+
+      for (const chip of chips) {
+        const active = state[chip.dataset.group as Group].has(chip.dataset.value!);
+        chip.setAttribute('aria-pressed', String(active));
+      }
+
+      const filtering = GROUPS.some((g) => state[g].size > 0);
+      if (status) {
+        status.textContent = filtering
+          ? `${visible} de ${total} ${total === 1 ? 'nota' : 'notas'}`
+          : `${total} ${total === 1 ? 'nota' : 'notas'}`;
+      }
+      if (clear) clear.hidden = !filtering;
+      noResults.hidden = visible > 0 || cards.length === 0;
+
+      // Guarda el estado en la URL sin recargar ni ensuciar el historial.
+      const url = new URL(window.location.href);
+      for (const g of GROUPS) {
+        if (state[g].size > 0) url.searchParams.set(g, [...state[g]].join(','));
+        else url.searchParams.delete(g);
+      }
+      // La coma no necesita escaparse en la query: así la URL se lee mejor.
+      history.replaceState(null, '', url.toString().replaceAll('%2C', ','));
+    }
 
     chips.forEach((chip) => {
       chip.addEventListener('click', () => {
-        const filter = chip.dataset.filter;
-        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-
-        let visible = 0;
-        cards.forEach((card) => {
-          const show = filter === 'all' || card.dataset.category === filter;
-          card.hidden = !show;
-          if (show) visible++;
-        });
-        status.textContent = filter === 'all' ? '' : `${visible} resultado${visible === 1 ? '' : 's'}`;
+        const set = state[chip.dataset.group as Group];
+        const value = chip.dataset.value!;
+        if (set.has(value)) set.delete(value);
+        else set.add(value);
+        apply();
       });
     });
+
+    clear?.addEventListener('click', () => {
+      GROUPS.forEach((g) => state[g].clear());
+      apply();
+    });
+
+    apply();
   });
 </script>
 
@@ -84,7 +197,50 @@ const categories = CATEGORIES.map((c) => ({
     gap: var(--space-5);
   }
 
-  .filterable__status:empty {
-    display: none;
+  .filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .filters__group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+
+  .filters__label {
+    color: var(--faint);
+    font-size: var(--fs-xs);
+  }
+
+  .filters__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: 2rem;
+    font-size: var(--fs-sm);
+  }
+
+  .filters__clear {
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--muted);
+    font-size: var(--fs-xs);
+  }
+
+  .filters__clear:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  @media (min-width: 48rem) {
+    .filters__group {
+      grid-template-columns: 7rem minmax(0, 1fr);
+      align-items: center;
+    }
   }
 </style>

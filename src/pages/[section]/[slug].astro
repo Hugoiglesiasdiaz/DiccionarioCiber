@@ -1,9 +1,9 @@
 ---
-/** Página de una entrada individual, generada desde su archivo Markdown. */
+/** Página de una nota, generada desde su archivo Markdown. */
 import { render } from 'astro:content';
 import EntryLayout from '../../layouts/EntryLayout.astro';
 import { REQUIRED_SECTIONS } from '../../data/site';
-import { SECTION_IDS, getRaw, toEntry, type RawEntry } from '../../lib/entries';
+import { SECTION_IDS, getAllEntries, getRaw, getRelated, toEntry, type RawEntry } from '../../lib/entries';
 
 export async function getStaticPaths() {
   const lists = await Promise.all(SECTION_IDS.map(getRaw));
@@ -16,13 +16,14 @@ export async function getStaticPaths() {
 const { raw } = Astro.props as { raw: RawEntry };
 const entry = toEntry(raw);
 const { Content, headings } = await render(raw);
+const related = getRelated(entry, await getAllEntries());
 
 // El índice se construye con los títulos de nivel 2 (##).
 const toc = headings.filter((h) => h.depth === 2).map((h) => ({ id: h.slug, label: h.text }));
 
-// Aviso en el build si la entrada no sigue su plantilla.
-const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const missing = REQUIRED_SECTIONS[entry.section].filter(
+// Aviso en el build si la nota no sigue la plantilla de su tipo.
+const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const missing = REQUIRED_SECTIONS[entry.tipo].filter(
   (req) => !toc.some((t) => normalize(t.label).startsWith(normalize(req))),
 );
 if (missing.length > 0) {
@@ -30,6 +31,6 @@ if (missing.length > 0) {
 }
 ---
 
-<EntryLayout entry={entry} toc={toc}>
+<EntryLayout entry={entry} toc={toc} related={related}>
   <Content />
 </EntryLayout>

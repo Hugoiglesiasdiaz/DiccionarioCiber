@@ -17,7 +17,7 @@ const entries = await getEntries(section);
 <BaseLayout title={info.label} description={info.intro}>
   <div class="container page">
     <header class="page-header">
-      <p class="eyebrow">~/{section} · {entries.length} {entries.length === 1 ? 'entrada' : 'entradas'}</p>
+      <p class="eyebrow">~/{section} · {entries.length} {entries.length === 1 ? 'nota' : 'notas'}</p>
       <h1 class="prompt">ls {section}/</h1>
       <p>{info.intro}</p>
     </header>

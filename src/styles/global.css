@@ -32,13 +32,13 @@
   --amber: #fbbf24;
   --red: #f87171;
 
-  /* Categorías */
-  --cat-forense: #a78bfa;
-  --cat-redes: #22d3ee;
-  --cat-pentesting: #f87171;
-  --cat-hardening: #4ade80;
-  --cat-osint: #fbbf24;
-  --cat-cripto: #f472b6;
+  /* Asignaturas */
+  --asig-hacking: #f87171;
+  --asig-incidentes: #fbbf24;
+  --asig-produccion: #22d3ee;
+  --asig-forense: #a78bfa;
+  --asig-normativa: #f472b6;
+  --asig-bastionado: #4ade80;
 
   /* Tipografía */
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
@@ -70,9 +70,65 @@
   --header-h: 3.5rem;
   --bottom-nav-h: 3.75rem;
 
+  /* Superficies especiales */
+  --input-bg: #070a0e; /* buscadores */
+  --code-bg: #070a0e; /* bloques de código y terminal */
+  --bar-bg: rgb(9 13 18 / 0.85); /* cabecera, barra inferior e índice fijos */
+  --grid-line: rgb(30 42 55 / 0.35); /* cuadrícula del inicio */
+  --on-accent: #04140a; /* texto sobre fondo verde */
+  --green-hover: #86efac;
+  --glow-alpha: 0.35;
+
   --shadow: 0 10px 30px -12px rgb(0 0 0 / 0.6);
-  --glow-green: 0 0 0 1px var(--green-dim), 0 0 24px -6px rgb(74 222 128 / 0.35);
+  --glow-green: 0 0 0 1px var(--green-dim),
+    0 0 24px -6px color-mix(in srgb, var(--green) calc(var(--glow-alpha) * 100%), transparent);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/*
+ * Tema claro. Lo activa el script del <head> (BaseLayout) poniendo
+ * data-theme="light" en <html>: según la preferencia guardada o, si no hay,
+ * la del sistema. Los acentos son más oscuros que en el tema oscuro para
+ * mantener un contraste AA (≥ 4.5:1) sobre fondo blanco.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f6f8fa;
+  --bg-soft: #eef2f6;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --border: #d8dee6;
+  --border-strong: #c2ccd6;
+
+  --text: #1f2933;
+  --text-strong: #0b1219;
+  --muted: #52606d;
+  --faint: #66727f;
+
+  --green: #157f3b;
+  --green-dim: #9ed9b2;
+  --cyan: #0e7490;
+  --cyan-dim: #a5dbe6;
+  --amber: #a16207;
+  --red: #c42b2b;
+
+  --asig-hacking: #c42b2b;
+  --asig-incidentes: #a16207;
+  --asig-produccion: #0e7490;
+  --asig-forense: #7c3aed;
+  --asig-normativa: #be185d;
+  --asig-bastionado: #157f3b;
+
+  --input-bg: #ffffff;
+  --code-bg: #f6f8fa;
+  --bar-bg: rgb(246 248 250 / 0.88);
+  --grid-line: rgb(148 163 184 / 0.22);
+  --on-accent: #ffffff;
+  --green-hover: #166534;
+  --glow-alpha: 0.18;
+
+  --shadow: 0 10px 30px -14px rgb(15 23 42 / 0.18);
 }
 
 /* ---------- Reset ---------- */
@@ -121,8 +177,8 @@ button {
 body {
   min-height: 100dvh;
   background:
-    radial-gradient(60rem 30rem at 85% -10%, rgb(34 211 238 / 0.06), transparent 60%),
-    radial-gradient(50rem 30rem at -10% 10%, rgb(74 222 128 / 0.05), transparent 60%),
+    radial-gradient(60rem 30rem at 85% -10%, color-mix(in srgb, var(--cyan) 6%, transparent), transparent 60%),
+    radial-gradient(50rem 30rem at -10% 10%, color-mix(in srgb, var(--green) 5%, transparent), transparent 60%),
     var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -168,7 +224,7 @@ p {
 
 a {
   color: var(--cyan);
-  text-decoration-color: rgb(34 211 238 / 0.4);
+  text-decoration-color: color-mix(in srgb, var(--cyan) 40%, transparent);
   text-underline-offset: 0.2em;
 }
 
@@ -183,7 +239,7 @@ a:hover {
 }
 
 ::selection {
-  background: rgb(74 222 128 / 0.3);
+  background: color-mix(in srgb, var(--green) 30%, transparent);
   color: var(--text-strong);
 }
 
@@ -370,12 +426,12 @@ kbd {
 .btn--primary {
   border-color: var(--green);
   background: var(--green);
-  color: #04140a;
+  color: var(--on-accent);
 }
 
 .btn--primary:hover {
-  border-color: #86efac;
-  background: #86efac;
+  border-color: var(--green-hover);
+  background: var(--green-hover);
 }
 
 /* Etiquetas */
@@ -496,7 +552,7 @@ kbd {
   overflow: hidden;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  background: #070a0e;
+  background: var(--code-bg);
   box-shadow: var(--shadow);
 }
 
@@ -633,7 +689,7 @@ kbd {
   padding: var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: #070a0e;
+  background: var(--code-bg);
   font-size: var(--fs-sm);
   line-height: 1.7;
   tab-size: 2;
@@ -683,7 +739,15 @@ kbd {
 
 /* Shiki pone el fondo en línea; se unifica con el del tema */
 .prose pre.astro-code {
-  background-color: #070a0e !important;
+  background-color: var(--code-bg) !important;
+}
+
+/* Tema claro: colores de github-light-default (variables que genera Shiki) */
+:root[data-theme='light'] .astro-code,
+:root[data-theme='light'] .astro-code span {
+  color: var(--shiki-light) !important;
+  font-style: var(--shiki-light-font-style) !important;
+  font-weight: var(--shiki-light-font-weight) !important;
 }
 
 /* Tablas: desplazables en horizontal si no caben */
