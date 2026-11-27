@@ -1,7 +1,8 @@
 ---
-/** Página de búsqueda: monta la isla de React con los datos ya serializados. */
+/** Página de búsqueda: pasa las notas y los filtros al buscador. */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SearchApp, { type SearchDoc } from '../components/search/SearchApp';
+import SearchApp from '../components/search/SearchApp.astro';
+import type { SearchDoc } from '../components/search/search';
 import { ASIGNATURAS, SECTIONS, TIPOS, type SectionId } from '../data/site';
 import { getAllEntries } from '../lib/entries';
 import { url } from '../lib/url';
@@ -30,7 +31,6 @@ const sections = (Object.keys(SECTIONS) as SectionId[]).map((id) => ({ id, label
     </header>
 
     <SearchApp
-      client:load
       docs={docs}
       asignaturas={asignaturas}
       sections={sections}

@@ -21,6 +21,10 @@ export interface Entry {
   /** Fecha de última actualización (YYYY-MM-DD). */
   updated: string;
   href: string;
+  /** Clave del tema ("forense/introduccion"), si pertenece a uno. */
+  tema?: string;
+  /** Posición dentro del tema. */
+  orden?: number;
 }
 
 export type RawEntry = CollectionEntry<SectionId>;
@@ -44,6 +48,8 @@ export function toEntry(raw: RawEntry): Entry {
     tags: data.etiquetas,
     updated: data.actualizado.toISOString().slice(0, 10),
     href: url(`${SECTIONS[raw.collection].href}${raw.id}/`),
+    tema: data.tema,
+    orden: data.orden,
   };
 }
 

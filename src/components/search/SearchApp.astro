@@ -1,0 +1,91 @@
+---
+/**
+ * Buscador. El HTML fijo (campo, interruptor y filtros) se genera aquí; la
+ * lógica y los resultados los pone search.ts en el navegador.
+ */
+import type { Option, SearchData, SearchDoc } from './search';
+import './search.css';
+
+interface Props {
+  docs: SearchDoc[];
+  asignaturas: Option[];
+  sections: Option[];
+  indexUrl: string;
+}
+
+const { docs, asignaturas, sections, indexUrl } = Astro.props;
+const data: SearchData = { docs, asignaturas, sections, indexUrl };
+
+const chipGroups = [
+  { key: 'section', label: 'Filtrar por sección', options: sections },
+  { key: 'asignatura', label: 'Filtrar por asignatura', options: asignaturas },
+];
+---
+
+<div class="search" data-search>
+  <script type="application/json" data-search-data set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+
+  <form class="search__form" role="search">
+    <label for="search-input" class="visually-hidden">Buscar</label>
+    <span class="search__prompt" aria-hidden="true">❯</span>
+    <input
+      id="search-input"
+      data-search-input
+      class="search__input"
+      type="search"
+      placeholder="comando, herramienta o concepto…"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button type="button" class="search__clear" data-search-clear aria-label="Borrar búsqueda" hidden>✕</button>
+  </form>
+
+  <div class="search__mode">
+    {/* Búsqueda semántica: implementación futura (ver docs/PLAN.md). */}
+    <label class="switch switch--disabled">
+      <input type="checkbox" disabled />
+      <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+      <span>Búsqueda semántica <span class="search__ai">IA</span></span>
+    </label>
+    <p class="search__mode-hint">
+      Próximamente: encontrar notas por significado aunque no uses las mismas palabras. Ahora se busca por
+      palabras clave en todo el texto, comandos incluidos.
+    </p>
+  </div>
+
+  <div class="search__filters">
+    {
+      chipGroups.map((g) => (
+        <div class="chips" role="group" aria-label={g.label} data-chips={g.key}>
+          {[{ id: 'all', label: 'Todas' } as Option, ...g.options].map((o) => (
+            <button
+              type="button"
+              class="chip"
+              data-value={o.id}
+              aria-pressed={o.id === 'all' ? 'true' : 'false'}
+              style={o.color ? `--c: ${o.color}` : undefined}
+              title={o.title}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+
+  <p class="search__count" aria-live="polite" data-search-count></p>
+
+  <ol class="results" data-search-results></ol>
+  <p class="empty" data-search-empty hidden>
+    <span>grep: sin coincidencias</span>
+    <span>Prueba con otras palabras o quita algún filtro.</span>
+  </p>
+</div>
+
+<script>
+  import { initSearch } from './search';
+
+  const root = document.querySelector<HTMLElement>('[data-search]');
+  if (root) initSearch(root);
+</script>

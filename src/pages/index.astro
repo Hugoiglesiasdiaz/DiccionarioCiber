@@ -4,27 +4,14 @@
  * últimas notas.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AsignaturaCards from '../components/AsignaturaCards.astro';
 import EntryCard from '../components/EntryCard.astro';
 import Icon from '../components/Icon.astro';
-import { ASIGNATURAS, SITE } from '../data/site';
+import { SITE } from '../data/site';
 import { getAllEntries } from '../lib/entries';
 import { url } from '../lib/url';
 
 const ENTRIES = await getAllEntries();
-
-/** Una tarjeta por asignatura con el número de conceptos y casos. */
-const asignaturas = ASIGNATURAS.map((a) => {
-  const notas = ENTRIES.filter((e) => e.asignaturas.includes(a.id));
-  return {
-    ...a,
-    conceptos: notas.filter((e) => e.section === 'conceptos').length,
-    casos: notas.filter((e) => e.section === 'casos').length,
-    total: notas.length,
-    href: url(`/buscar/?asignatura=${a.id}`),
-  };
-});
-
-const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 ---
 
 <BaseLayout>
@@ -89,30 +76,9 @@ const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno
     <section class="section" aria-labelledby="asignaturas">
       <div class="section-title">
         <h2 id="asignaturas" class="hash">Asignaturas</h2>
+        <a href={url('/asignaturas/')}>ver temario →</a>
       </div>
-      <ul class="grid grid--3 subjects">
-        {
-          asignaturas.map((a) => (
-            <li class={`card subject ${a.total > 0 ? 'card--link' : 'subject--empty'}`} style={`--c: ${a.color}`}>
-              <span class="subject__short mono">{a.corto}</span>
-              <h3 class="subject__name">
-                {a.total > 0 ? (
-                  <a class="card__link" href={a.href}>
-                    {a.nombre}
-                  </a>
-                ) : (
-                  a.nombre
-                )}
-              </h3>
-              <p class="subject__count mono">
-                {a.total > 0
-                  ? `${plural(a.conceptos, 'concepto', 'conceptos')} · ${plural(a.casos, 'caso', 'casos')} →`
-                  : 'sin notas todavía'}
-              </p>
-            </li>
-          ))
-        }
-      </ul>
+      <AsignaturaCards entries={ENTRIES} />
     </section>
 
     <!-- Últimas notas -->
@@ -231,40 +197,5 @@ const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno
       gap: var(--space-7);
       padding-block: var(--space-8);
     }
-  }
-
-  /* Tarjetas de asignatura */
-  .subjects {
-    padding: 0;
-    list-style: none;
-  }
-
-  .subject {
-    gap: var(--space-2);
-    border-top: 3px solid var(--c);
-  }
-
-  .subject__short {
-    color: var(--c);
-    font-size: var(--fs-xs);
-    font-weight: 700;
-  }
-
-  .subject__name {
-    flex: 1;
-    font-size: var(--fs-lg);
-  }
-
-  .subject__count {
-    color: var(--muted);
-    font-size: var(--fs-xs);
-  }
-
-  .subject--empty {
-    opacity: 0.55;
-  }
-
-  .subject--empty .subject__name {
-    color: var(--muted);
   }
 </style>

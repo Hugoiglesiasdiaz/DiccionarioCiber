@@ -12,7 +12,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { ASIGNATURAS, EXTRAS_FRONTMATTER } from './data/site';
+import { ASIGNATURAS, EXTRAS_FRONTMATTER, TEMA_KEYS } from './data/site';
 
 const asignaturaIds = ASIGNATURAS.map((a) => a.id) as [string, ...string[]];
 
@@ -27,6 +27,18 @@ const base = {
   actualizado: z.coerce.date(),
   /** Los borradores se ven en `npm run dev` pero no se publican. */
   borrador: z.boolean().default(false),
+  /** Tema de una asignatura al que pertenece: "forense/introduccion" (ver TEMAS en site.ts). */
+  tema: z.enum(TEMA_KEYS as [string, ...string[]]).optional(),
+  /** Posición dentro del tema (1, 2, 3…). Sin orden, va al final por título. */
+  orden: z.number().int().positive().optional(),
+};
+
+/** El tema tiene que ser de una de las asignaturas de la nota. */
+const temaDeSuAsignatura = (data: { tema?: string; asignaturas: string[] }) =>
+  !data.tema || data.asignaturas.includes(data.tema.split('/')[0]);
+const temaError = {
+  message: 'El tema debe pertenecer a una de las asignaturas de la nota',
+  path: ['tema'],
 };
 
 /** Los archivos que empiezan por "_" se ignoran (útil para notas a medias). */
@@ -38,13 +50,13 @@ export const collections = {
     schema: z.object({
       ...base,
       tipo: z.enum(['concepto', 'herramienta']).default('concepto'),
-    }),
+    }).refine(temaDeSuAsignatura, temaError),
   }),
   casos: defineCollection({
     loader: loader('casos'),
     schema: z.object({
       ...base,
       tipo: z.literal('caso').default('caso'),
-    }),
+    }).refine(temaDeSuAsignatura, temaError),
   }),
 };

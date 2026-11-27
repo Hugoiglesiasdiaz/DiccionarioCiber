@@ -1,0 +1,255 @@
+---
+/**
+ * Temario de una asignatura: sus temas en orden, con las notas de cada uno
+ * numeradas, y debajo las notas de la asignatura que no tienen tema.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryCard from '../../components/EntryCard.astro';
+import { ASIGNATURAS, TIPOS, type AsignaturaId } from '../../data/site';
+import { getAllEntries } from '../../lib/entries';
+import { getTemario } from '../../lib/temas';
+import { url } from '../../lib/url';
+
+export function getStaticPaths() {
+  return ASIGNATURAS.map((a) => ({ params: { id: a.id } }));
+}
+
+const id = Astro.params.id as AsignaturaId;
+const asignatura = ASIGNATURAS.find((a) => a.id === id)!;
+const { temas, sinTema, total } = getTemario(id, await getAllEntries());
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<BaseLayout title={asignatura.nombre} description={`Temario y notas de ${asignatura.nombre}.`}>
+  <div class="container page asignatura" style={`--c: ${asignatura.color}`}>
+    <nav class="crumbs mono" aria-label="Ruta">
+      <a href={url('/')}>~</a>
+      <span>/</span>
+      <a href={url('/asignaturas/')}>asignaturas</a>
+      <span>/</span>
+      <span aria-current="page">{id}</span>
+    </nav>
+
+    <header class="page-header asignatura__header">
+      <p class="eyebrow asignatura__eyebrow">{asignatura.corto} · {total} {total === 1 ? 'nota' : 'notas'}</p>
+      <h1>{asignatura.nombre}</h1>
+      {
+        total > 0 && (
+          <p>
+            <a href={url(`/buscar/?asignatura=${id}`)}>Buscar dentro de esta asignatura →</a>
+          </p>
+        )
+      }
+    </header>
+
+    {
+      temas.length > 0 && (
+        <section class="temario" aria-labelledby="temario">
+          <h2 id="temario" class="hash">
+            Temario
+          </h2>
+          <ol class="temas">
+            {temas.map((t) => (
+              <li class:list={['tema', { 'tema--vacio': t.notas.length === 0 }]} id={t.id}>
+                <div class="tema__head">
+                  <span class="tema__num mono">{pad(t.numero)}</span>
+                  <div>
+                    <h3 class="tema__nombre">{t.nombre}</h3>
+                    {t.descripcion && <p class="tema__desc">{t.descripcion}</p>}
+                  </div>
+                </div>
+                {t.notas.length > 0 ? (
+                  <ol class="tema__notas">
+                    {t.notas.map((n, i) => (
+                      <li>
+                        <a class="tema__nota" href={n.href}>
+                          <span class="tema__nota-num mono">
+                            {t.numero}.{i + 1}
+                          </span>
+                          <span class="tema__nota-titulo">{n.title}</span>
+                          <span class={`tema__nota-tipo mono tema__nota-tipo--${n.tipo}`}>{TIPOS[n.tipo].label}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p class="tema__vacio mono">sin notas todavía</p>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
+    {
+      sinTema.length > 0 && (
+        <section class="section sin-tema" aria-labelledby="otras">
+          <div class="section-title">
+            <h2 id="otras" class="hash">
+              {temas.length > 0 ? 'Otras notas' : 'Notas'}
+            </h2>
+          </div>
+          <div class="grid grid--3">
+            {sinTema.map((entry) => (
+              <EntryCard entry={entry} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      total === 0 && (
+        <p class="empty">
+          <span>$ ls {id}/</span>
+          <span>Todavía no hay notas de esta asignatura.</span>
+        </p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35ch;
+    margin-bottom: var(--space-5);
+    color: var(--faint);
+    font-size: var(--fs-sm);
+  }
+
+  .crumbs a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--cyan);
+  }
+
+  .crumbs [aria-current] {
+    color: var(--c);
+  }
+
+  .asignatura__header {
+    padding-top: var(--space-4);
+    border-top: 3px solid var(--c);
+  }
+
+  .asignatura__eyebrow {
+    color: var(--c);
+  }
+
+  .temario > h2 {
+    margin-bottom: var(--space-5);
+  }
+
+  .temas {
+    display: grid;
+    gap: var(--space-4);
+    padding: 0;
+    list-style: none;
+  }
+
+  .tema {
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--c);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, var(--surface), var(--bg-soft));
+    scroll-margin-top: calc(var(--header-h) + var(--space-4));
+  }
+
+  .tema:target {
+    border-color: var(--c);
+  }
+
+  .tema__head {
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+
+  .tema__num {
+    color: var(--c);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+  }
+
+  .tema__nombre {
+    font-size: var(--fs-lg);
+  }
+
+  .tema__desc {
+    margin-top: var(--space-1);
+    color: var(--muted);
+    font-size: var(--fs-sm);
+  }
+
+  .tema__notas {
+    display: grid;
+    margin-top: var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+
+  .tema__nota {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    gap: var(--space-2);
+    align-items: baseline;
+    padding: var(--space-2) var(--space-2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .tema__nota:hover {
+    background: var(--surface-2);
+  }
+
+  .tema__nota:hover .tema__nota-titulo {
+    color: var(--c);
+  }
+
+  .tema__nota-num {
+    color: var(--faint);
+    font-size: var(--fs-sm);
+  }
+
+  .tema__nota-tipo {
+    color: var(--faint);
+    font-size: var(--fs-xs);
+  }
+
+  .tema__nota-tipo--herramienta {
+    color: var(--cyan);
+  }
+
+  .tema__nota-tipo--caso {
+    color: var(--green);
+  }
+
+  .tema__vacio {
+    margin-top: var(--space-2);
+    padding-left: calc(var(--space-3) + 1.5rem);
+    color: var(--faint);
+    font-size: var(--fs-xs);
+  }
+
+  .tema--vacio .tema__nombre {
+    color: var(--muted);
+  }
+
+  @media (max-width: 30rem) {
+    .tema__nota {
+      grid-template-columns: 2.25rem minmax(0, 1fr);
+    }
+
+    .tema__nota-tipo {
+      grid-column: 2;
+    }
+  }
+</style>

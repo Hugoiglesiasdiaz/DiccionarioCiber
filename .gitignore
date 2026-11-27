@@ -10,6 +10,12 @@ dist/
 .vite/
 
 # ---------------------------------------------------------------
+# Material del curso (PDF con copyright y prácticas con datos reales).
+# Solo se usa en local para preparar las notas; nunca se sube.
+# ---------------------------------------------------------------
+material/
+
+# ---------------------------------------------------------------
 # Herramientas de IA y asistentes de código (configuración local)
 # ---------------------------------------------------------------
 .claude/

@@ -1,0 +1,20 @@
+---
+/** Listado de asignaturas; cada una lleva a su temario. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AsignaturaCards from '../../components/AsignaturaCards.astro';
+import { getAllEntries } from '../../lib/entries';
+
+const entries = await getAllEntries();
+---
+
+<BaseLayout title="Asignaturas" description="Las notas organizadas por asignatura y por tema.">
+  <div class="container page">
+    <header class="page-header">
+      <p class="eyebrow">~/asignaturas · {entries.length} notas</p>
+      <h1 class="prompt">ls asignaturas/</h1>
+      <p>Cada asignatura tiene su temario: las notas agrupadas por tema y en orden de lectura.</p>
+    </header>
+
+    <AsignaturaCards entries={entries} />
+  </div>
+</BaseLayout>

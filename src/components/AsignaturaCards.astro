@@ -1,0 +1,93 @@
+---
+/**
+ * Rejilla con una tarjeta por asignatura: nombre, número de notas y de
+ * temas. Cada tarjeta lleva a /asignaturas/<id>/. Se usa en el inicio y en
+ * /asignaturas/.
+ */
+import { ASIGNATURAS, TEMAS } from '../data/site';
+import type { Entry } from '../lib/entries';
+import { url } from '../lib/url';
+
+interface Props {
+  entries: Entry[];
+}
+
+const { entries } = Astro.props;
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+
+const asignaturas = ASIGNATURAS.map((a) => {
+  const notas = entries.filter((e) => e.asignaturas.includes(a.id));
+  const conceptos = notas.filter((e) => e.section === 'conceptos').length;
+  const casos = notas.filter((e) => e.section === 'casos').length;
+  const temas = TEMAS[a.id]?.length ?? 0;
+  return {
+    ...a,
+    total: notas.length,
+    resumen:
+      notas.length > 0
+        ? `${plural(conceptos, 'concepto', 'conceptos')} · ${plural(casos, 'caso', 'casos')}`
+        : 'sin notas todavía',
+    temas: temas > 0 ? plural(temas, 'tema', 'temas') : '',
+    href: url(`/asignaturas/${a.id}/`),
+  };
+});
+---
+
+<ul class="grid grid--3 subjects">
+  {
+    asignaturas.map((a) => (
+      <li class:list={['card card--link subject', { 'subject--empty': a.total === 0 }]} style={`--c: ${a.color}`}>
+        <span class="subject__short mono">{a.corto}</span>
+        <h3 class="subject__name">
+          <a class="card__link" href={a.href}>
+            {a.nombre}
+          </a>
+        </h3>
+        <p class="subject__count mono">
+          {a.resumen}
+          {a.temas && <span class="subject__temas"> · {a.temas}</span>} →
+        </p>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .subjects {
+    padding: 0;
+    list-style: none;
+  }
+
+  .subject {
+    gap: var(--space-2);
+    border-top: 3px solid var(--c);
+  }
+
+  .subject__short {
+    color: var(--c);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+  }
+
+  .subject__name {
+    flex: 1;
+    font-size: var(--fs-lg);
+  }
+
+  .subject__count {
+    color: var(--muted);
+    font-size: var(--fs-xs);
+  }
+
+  .subject__temas {
+    color: var(--c);
+  }
+
+  .subject--empty {
+    opacity: 0.55;
+  }
+
+  .subject--empty .subject__name :global(a) {
+    color: var(--muted);
+  }
+</style>

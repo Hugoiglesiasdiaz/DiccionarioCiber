@@ -39,6 +39,9 @@ Es un proyecto independiente de mi portfolio
   de la cabecera, y lo recuerda. Sin parpadeo al cargar.
 - **Pensado para el móvil**: barra de navegación inferior, índice de la nota
   en forma de chips y bloques de código con botón de copiar.
+- **Temario por asignatura**: cada asignatura tiene una página con sus notas
+  agrupadas por tema y en orden de lectura, y cada nota enlaza con la anterior
+  y la siguiente de su tema.
 - **Notas relacionadas** al final de cada nota, según asignaturas y extras
   en común.
 - **Plantillas fijas** para herramientas y casos prácticos, con aviso en el
@@ -51,7 +54,7 @@ Es un proyecto independiente de mi portfolio
 | Parte | Tecnología |
 | --- | --- |
 | Framework | [Astro 6](https://astro.build): genera HTML estático |
-| Interactividad | Isla de [React 19](https://react.dev) (solo en el buscador) |
+| Interactividad | TypeScript sin framework (buscador, filtros y tema) |
 | Contenido | Colecciones de contenido de Astro + esquemas con Zod |
 | Búsqueda | [MiniSearch](https://lucaong.github.io/minisearch/) con índice precalculado en el build |
 | Resaltado de código | Shiki (`github-dark-default` / `github-light-default`) |
@@ -121,6 +124,8 @@ borrador: true
 | `asignaturas` | sí, al menos una | Ver tabla de abajo |
 | `extras` | no | `comandos`, `linux`, `windows` |
 | `etiquetas` | no | Palabras clave extra para el buscador |
+| `tema` | no | Tema de una de sus asignaturas: `forense/introduccion` (ver abajo) |
+| `orden` | no | Posición dentro del tema: `1`, `2`, `3`… |
 | `actualizado` | sí | Fecha `AAAA-MM-DD` |
 | `borrador` | no | `true` → visible en desarrollo, no se publica |
 
@@ -134,6 +139,27 @@ borrador: true
 | `bastionado` | Bastionado de Sistemas y Redes |
 
 El extra **Herramienta** no se escribe: se añade solo con `tipo: herramienta`.
+
+### Temas
+
+Los temas de cada asignatura se definen en `TEMAS`, en
+[`src/data/site.ts`](src/data/site.ts), en el orden en que se muestran. Para
+crear uno nuevo basta con añadirlo ahí. Una nota se asigna a un tema así:
+
+```yaml
+asignaturas: [forense, normativa]
+tema: forense/introduccion   # asignatura/tema; la asignatura debe estar en la lista de arriba
+orden: 3                     # posición dentro del tema
+```
+
+Con eso aparece numerada en `/asignaturas/forense/` (3.ª nota del tema 1) y
+muestra «Tema 1: Introducción · 3/6» con enlaces a la anterior y la siguiente.
+Las notas sin tema salen en «Otras notas». El build falla si el tema no existe
+o no es de una de las asignaturas de la nota.
+
+| Asignatura | Temas |
+| --- | --- |
+| `forense` | `introduccion`, `adquisicion`, `artefactos-windows` |
 
 ### Extras de Markdown
 
@@ -191,14 +217,22 @@ cualquier hosting estático. Dos variables de entorno controlan la dirección:
 ### GitHub Pages
 
 El workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
-compila y publica la web en cada push a `main`.
+compila y publica la web en cada push a `main`, por defecto en
+**https://ciberseguridad.hugoiglesiasdiaz.es**.
 
-1. En el repositorio: **Settings → Pages → Source: GitHub Actions**.
-2. Sin más configuración, la web queda en
-   `https://<usuario>.github.io/<repositorio>/`.
-3. Con dominio propio: crea las variables `SITE_URL` y `BASE_PATH` (`/`) en
-   **Settings → Secrets and variables → Actions → Variables** y configura el
-   dominio en **Settings → Pages → Custom domain**.
+1. **DNS** (zona del dominio): un registro `CNAME` con subdominio
+   `ciberseguridad` y destino `<usuario>.github.io.`. No hay que tocar los
+   registros del correo (MX, SPF, autodiscover).
+2. En el repositorio: **Settings → Pages → Source: GitHub Actions** y en
+   **Custom domain** `ciberseguridad.hugoiglesiasdiaz.es`. Cuando el DNS
+   propague, marcar **Enforce HTTPS**.
+3. Recomendado: verificar el dominio en la configuración de la cuenta de
+   GitHub (**Settings → Pages → Add a domain**, con un registro `TXT`).
+
+Para publicar en otra dirección no hace falta tocar el workflow: basta con crear
+las variables `SITE_URL` y `BASE_PATH` en **Settings → Secrets and variables →
+Actions → Variables** (sin dominio propio: `https://<usuario>.github.io` y
+`/<repositorio>`).
 
 ### Otro hosting
 
@@ -221,9 +255,10 @@ entorno del build.
     │   ├── Footer.astro
     │   ├── EntryCard.astro        Tarjeta de una nota en los listados
     │   ├── AsignaturaBadges.astro Insignias de color de las asignaturas
+    │   ├── AsignaturaCards.astro  Tarjetas de asignatura (inicio y /asignaturas/)
     │   ├── FilterableList.astro   Listado con filtros combinables
     │   ├── Icon.astro             Iconos SVG en línea
-    │   └── search/                Buscador (isla de React)
+    │   └── search/                Buscador (SearchApp.astro + search.ts)
     ├── content/
     │   ├── conceptos/             Conceptos y herramientas (.md)
     │   └── casos/                 Casos prácticos (.md)
@@ -234,12 +269,14 @@ entorno del build.
     │   └── EntryLayout.astro      Página de una nota con índice y relacionadas
     ├── lib/
     │   ├── entries.ts             Lectura de las colecciones
+    │   ├── temas.ts               Temario y navegación anterior/siguiente
     │   ├── markdown-text.ts       Markdown → texto plano para el buscador
     │   ├── remark-callouts.mjs    Plugin de cajas destacadas
     │   ├── search-config.ts       Opciones de MiniSearch (build y navegador)
     │   └── url.ts                 URLs respetando la ruta base
     ├── pages/
     │   ├── index.astro            Inicio
+    │   ├── asignaturas/           Listado y temario de cada asignatura
     │   ├── [section]/index.astro  Listados: conceptos y casos
     │   ├── [section]/[slug].astro Página de cada nota
     │   ├── buscar.astro           Buscador
@@ -253,6 +290,7 @@ entorno del build.
 
 - [x] Modelo de contenido: conceptos, herramientas y casos prácticos
 - [x] Filtros por asignatura y extras, notas relacionadas
+- [x] Temario por asignatura con navegación entre notas
 - [x] Tema claro
 - [x] Búsqueda por palabras clave en el texto completo
 - [x] Preparación para publicar (sitemap, Open Graph, despliegue)

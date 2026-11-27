@@ -10,6 +10,9 @@ asignaturas: [bastionado]
 extras: []
 # Opcional: palabras clave extra para el buscador
 etiquetas: []
+# Opcional: tema de una asignatura (ver TEMAS en src/data/site.ts) y posición dentro de él
+# tema: forense/introduccion
+# orden: 1
 actualizado: 2026-01-01
 borrador: true # quítalo (o pon false) para publicarla
 ---

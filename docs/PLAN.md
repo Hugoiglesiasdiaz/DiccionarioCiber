@@ -100,15 +100,22 @@ plantillas/concepto.md · herramienta.md · caso.md
 ## 2. Páginas y navegación
 
 Navegación (barra inferior en el móvil, superior en escritorio):
-**Inicio · Conceptos · Casos prácticos · Buscar**
+**Inicio · Asignaturas · Conceptos · Casos prácticos · Buscar**
 
 ### Inicio (en este orden)
 1. **Buscador grande** arriba: escribes y vas directo a los resultados.
 2. **Ventana de terminal** decorativa.
 3. **Accesos por asignatura**: 6 tarjetas con nombre, color y número de
-   conceptos y casos. Cada una abre el buscador filtrado por esa asignatura
-   (`/buscar/?asignatura=forense`), que muestra conceptos y casos juntos.
+   conceptos y casos. Cada una abre el temario de esa asignatura
+   (`/asignaturas/forense/`).
 4. **Últimas notas** añadidas o actualizadas.
+
+### Asignaturas y temario
+- `/asignaturas/`: las 6 tarjetas de asignatura.
+- `/asignaturas/<id>/`: temario de la asignatura. Los temas (definidos en
+  `TEMAS`, en `src/data/site.ts`) aparecen en orden, con sus notas numeradas
+  (1.1, 1.2…). Debajo, «Otras notas»: las de la asignatura sin tema.
+- Una nota entra en un tema con `tema: forense/introduccion` y `orden: 1`.
 
 ### Conceptos y Casos prácticos (listados)
 - Filtros combinables por grupos: Asignatura · Extras.
@@ -120,6 +127,8 @@ Navegación (barra inferior en el móvil, superior en escritorio):
 - Ruta (`~/conceptos/volatility`), tipo, asignaturas, extras y fecha.
 - Índice (chips en el móvil, lateral en escritorio).
 - Bloques de código con botón **copiar**; cajas `[!TIP]`, `[!WARNING]`, `[!ERROR]`.
+- Si tiene tema: «Forense › Tema 1: Introducción · 3/6» encima del título, y
+  enlaces a la **nota anterior y la siguiente** del tema al final.
 - Al final: **otras notas de la misma asignatura**.
 
 ### Buscar
@@ -187,6 +196,5 @@ Navegación (barra inferior en el móvil, superior en escritorio):
 
 ## 7. Pendiente de decidir
 
-- **Dominio:** ¿un subdominio de tu web (p. ej. `apuntes.hugoiglesiasdiaz.es`)
-  o la dirección por defecto del hosting?
-- **Hosting:** GitHub Pages u otro (Netlify, Cloudflare Pages…). Lo decides tú.
+- ~~**Dominio y hosting**~~ ✅ Decidido: GitHub Pages en
+  `ciberseguridad.hugoiglesiasdiaz.es` (CNAME en la zona DNS de OVH).

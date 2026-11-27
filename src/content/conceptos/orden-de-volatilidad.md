@@ -4,6 +4,8 @@ descripcion: Qué evidencias recoger primero y por qué, según las recomendacio
 tipo: concepto
 asignaturas: [forense, incidentes]
 etiquetas: [rfc3227, adquisición, evidencias]
+tema: forense/adquisicion
+orden: 1
 actualizado: 2026-11-21
 ---
 

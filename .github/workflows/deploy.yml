@@ -1,13 +1,15 @@
 # Publica la web en GitHub Pages cada vez que se sube algo a `main`
 # (también se puede lanzar a mano desde la pestaña Actions).
 #
-# Antes de la primera vez: Settings → Pages → Source: "GitHub Actions".
+# Antes de la primera vez:
+#   - Settings → Pages → Source: "GitHub Actions".
+#   - Settings → Pages → Custom domain: ciberseguridad.hugoiglesiasdiaz.es
+#   - En la zona DNS del dominio, un CNAME `ciberseguridad` → <usuario>.github.io.
 #
-# Dirección de la web (variables opcionales en Settings → Secrets and
-# variables → Actions → Variables):
-#   - Sin variables: https://<usuario>.github.io/<repositorio>/
-#   - Con dominio propio: SITE_URL=https://apuntes.ejemplo.es y BASE_PATH=/
-#     (y el dominio configurado en Settings → Pages → Custom domain).
+# La dirección se puede cambiar sin tocar este archivo con las variables
+# SITE_URL y BASE_PATH (Settings → Secrets and variables → Actions → Variables).
+# Por ejemplo, sin dominio propio: SITE_URL=https://<usuario>.github.io y
+# BASE_PATH=/<repositorio>.
 name: Desplegar en GitHub Pages
 
 on:
@@ -41,8 +43,8 @@ jobs:
       - name: Compilar
         run: npm run build
         env:
-          SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io', github.repository_owner) }}
-          BASE_PATH: ${{ vars.BASE_PATH || format('/{0}', github.event.repository.name) }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://ciberseguridad.hugoiglesiasdiaz.es' }}
+          BASE_PATH: ${{ vars.BASE_PATH || '/' }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

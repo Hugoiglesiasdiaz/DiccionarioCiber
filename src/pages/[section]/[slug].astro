@@ -4,6 +4,7 @@ import { render } from 'astro:content';
 import EntryLayout from '../../layouts/EntryLayout.astro';
 import { REQUIRED_SECTIONS } from '../../data/site';
 import { SECTION_IDS, getAllEntries, getRaw, getRelated, toEntry, type RawEntry } from '../../lib/entries';
+import { getTemaNav } from '../../lib/temas';
 
 export async function getStaticPaths() {
   const lists = await Promise.all(SECTION_IDS.map(getRaw));
@@ -16,7 +17,14 @@ export async function getStaticPaths() {
 const { raw } = Astro.props as { raw: RawEntry };
 const entry = toEntry(raw);
 const { Content, headings } = await render(raw);
-const related = getRelated(entry, await getAllEntries());
+const all = await getAllEntries();
+const temaNav = getTemaNav(entry, all);
+// Las vecinas del tema ya se enlazan abajo: no se repiten en "relacionadas".
+const vecinas = new Set([temaNav?.anterior?.href, temaNav?.siguiente?.href]);
+const related = getRelated(
+  entry,
+  all.filter((e) => !vecinas.has(e.href)),
+);
 
 // El índice se construye con los títulos de nivel 2 (##).
 const toc = headings.filter((h) => h.depth === 2).map((h) => ({ id: h.slug, label: h.text }));
@@ -31,6 +39,6 @@ if (missing.length > 0) {
 }
 ---
 
-<EntryLayout entry={entry} toc={toc} related={related}>
+<EntryLayout entry={entry} toc={toc} related={related} temaNav={temaNav}>
   <Content />
 </EntryLayout>

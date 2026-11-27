@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import { unified } from '@astrojs/markdown-remark';
 import process from 'node:process';
@@ -21,16 +20,18 @@ export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   trailingSlash: 'always',
   integrations: [
-    react(),
     // sitemap-index.xml con todas las páginas menos la 404.
     sitemap({ filter: (page) => !/\/404\/?$/.test(new URL(page).pathname) }),
   ],
   vite: {
+    // `astro check` y `astro build` pre-empaquetan las dependencias en modo
+    // producción. Cada comando usa su propia caché para que no pisen la de
+    // `astro dev` (Vite las sirve al navegador con caché permanente).
+    cacheDir: process.argv.includes('dev') ? 'node_modules/.vite' : 'node_modules/.vite-build',
     optimizeDeps: {
-      // Pre-empaqueta React al arrancar `npm run dev`. Si no, Vite lo descubre
-      // al abrir /buscar/ por primera vez, lo re-empaqueta en caliente y la
-      // página mezcla dos versiones ("jsxDEV is not a function").
-      include: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-dom', 'react-dom/client', 'minisearch'],
+      // Pre-empaqueta MiniSearch al arrancar `npm run dev` en vez de
+      // descubrirlo al abrir /buscar/ y recargar la página a mitad.
+      include: ['minisearch'],
     },
   },
   markdown: {

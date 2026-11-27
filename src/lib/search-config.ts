@@ -3,7 +3,7 @@
  * y el navegador (que lo carga). Ambos lados TIENEN que usar las mismas
  * opciones; si no, `MiniSearch.loadJSON` no encontraría los términos.
  *
- * Este archivo no importa nada de Astro para poder usarse en la isla de React.
+ * Este archivo no importa nada de Astro para poder usarse en el script del navegador.
  */
 import type { AsPlainObject, Options, SearchOptions } from 'minisearch';
 

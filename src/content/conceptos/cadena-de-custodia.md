@@ -4,6 +4,8 @@ descripcion: Cómo documentar una evidencia desde que se recoge hasta que se pre
 tipo: concepto
 asignaturas: [forense, normativa]
 etiquetas: [legal, evidencias, hash, documentación]
+tema: forense/adquisicion
+orden: 2
 actualizado: 2026-11-15
 ---
 

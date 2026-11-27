@@ -9,7 +9,8 @@ import Icon from '../components/Icon.astro';
 import AsignaturaBadges from '../components/AsignaturaBadges.astro';
 import EntryCard from '../components/EntryCard.astro';
 import type { Entry } from '../lib/entries';
-import { EXTRAS, SECTIONS, TIPOS, type TocItem } from '../data/site';
+import type { getTemaNav } from '../lib/temas';
+import { EXTRAS, SECTIONS, TIPOS, getAsignatura, type TocItem } from '../data/site';
 import { url } from '../lib/url';
 
 interface Props {
@@ -17,9 +18,13 @@ interface Props {
   toc?: TocItem[];
   /** Otras notas que comparten asignatura (ver getRelated). */
   related?: Entry[];
+  /** Tema al que pertenece la nota y sus vecinas (ver getTemaNav). */
+  temaNav?: ReturnType<typeof getTemaNav>;
 }
 
-const { entry, toc = [], related = [] } = Astro.props;
+const { entry, toc = [], related = [], temaNav } = Astro.props;
+const temaAsig = temaNav ? getAsignatura(temaNav.tema.asignatura) : undefined;
+const temaHref = temaNav ? url(`/asignaturas/${temaNav.tema.asignatura}/#${temaNav.tema.id}`) : '';
 const extras = EXTRAS.filter((x) => x.id !== 'herramienta' && entry.extras.includes(x.id));
 const section = SECTIONS[entry.section];
 const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -37,6 +42,20 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
 
     <header class="entry-header">
       <p class={`entry-header__tipo entry-header__tipo--${entry.tipo}`}>[{TIPOS[entry.tipo].label}]</p>
+      {
+        temaNav && temaAsig && (
+          <a class="entry-tema mono" href={temaHref} style={`--c: ${temaAsig.color}`}>
+            <span class="entry-tema__asig">{temaAsig.corto}</span>
+            <span class="entry-tema__sep">›</span>
+            <span>
+              Tema {temaNav.tema.numero}: {temaNav.tema.nombre}
+            </span>
+            <span class="entry-tema__pos">
+              {temaNav.posicion}/{temaNav.total}
+            </span>
+          </a>
+        )
+      }
       <h1>{entry.title}</h1>
       <p class="entry-header__desc">{entry.description}</p>
       <AsignaturaBadges ids={entry.asignaturas} full />
@@ -77,6 +96,25 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
         <slot />
       </article>
     </div>
+
+    {
+      temaNav && (temaNav.anterior || temaNav.siguiente) && (
+        <nav class="tema-nav" aria-label={`Tema ${temaNav.tema.numero}: ${temaNav.tema.nombre}`}>
+          {temaNav.anterior && (
+            <a class="card card--link tema-nav__link tema-nav__link--prev" href={temaNav.anterior.href}>
+              <span class="tema-nav__label mono">← anterior</span>
+              <span class="tema-nav__title">{temaNav.anterior.title}</span>
+            </a>
+          )}
+          {temaNav.siguiente && (
+            <a class="card card--link tema-nav__link tema-nav__link--next" href={temaNav.siguiente.href}>
+              <span class="tema-nav__label mono">siguiente →</span>
+              <span class="tema-nav__title">{temaNav.siguiente.title}</span>
+            </a>
+          )}
+        </nav>
+      )
+    }
 
     {
       related.length > 0 && (
@@ -243,6 +281,76 @@ const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric
 
   .toc__num {
     color: var(--faint);
+  }
+
+  /* Tema de la nota (encima del título) */
+  .entry-tema {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6ch;
+    width: fit-content;
+    color: var(--muted);
+    font-size: var(--fs-sm);
+    text-decoration: none;
+  }
+
+  .entry-tema:hover {
+    color: var(--c);
+  }
+
+  .entry-tema__asig {
+    color: var(--c);
+    font-weight: 700;
+  }
+
+  .entry-tema__sep {
+    color: var(--faint);
+  }
+
+  .entry-tema__pos {
+    padding: 0 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--faint);
+    font-size: var(--fs-xs);
+  }
+
+  /* Anterior / siguiente dentro del tema */
+  .tema-nav {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-7);
+  }
+
+  .tema-nav__link {
+    gap: var(--space-1);
+    text-decoration: none;
+  }
+
+  .tema-nav__label {
+    color: var(--faint);
+    font-size: var(--fs-xs);
+  }
+
+  .tema-nav__title {
+    color: var(--text-strong);
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  .tema-nav__link--next {
+    text-align: right;
+  }
+
+  @media (min-width: 40rem) {
+    .tema-nav {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .tema-nav__link--next {
+      grid-column: 2;
+    }
   }
 
   .related {

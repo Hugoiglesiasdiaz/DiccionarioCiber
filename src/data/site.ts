@@ -20,7 +20,7 @@ export const SITE = {
 
 /* ---------- Navegación ---------- */
 
-export type IconName = 'home' | 'tool' | 'flag' | 'book' | 'search';
+export type IconName = 'home' | 'tool' | 'flag' | 'book' | 'search' | 'layers';
 
 export interface NavItem {
   href: string;
@@ -32,6 +32,7 @@ export interface NavItem {
 
 export const NAV: NavItem[] = [
   { href: '/', label: 'Inicio', icon: 'home' },
+  { href: '/asignaturas/', label: 'Asignaturas', icon: 'layers' },
   { href: '/conceptos/', label: 'Conceptos', icon: 'book' },
   { href: '/casos/', label: 'Casos prácticos', short: 'Casos', icon: 'flag' },
   { href: '/buscar/', label: 'Buscar', icon: 'search' },
@@ -69,6 +70,55 @@ export type AsignaturaId = (typeof ASIGNATURAS)[number]['id'];
 
 export function getAsignatura(id: AsignaturaId) {
   return ASIGNATURAS.find((a) => a.id === id)!;
+}
+
+/* ---------- Temas (bloques ordenados dentro de cada asignatura) ---------- */
+
+export interface Tema {
+  /** Identificador corto; en el frontmatter se escribe `asignatura/id`. */
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
+
+/**
+ * Temario de cada asignatura, en el orden en que se muestra.
+ * Una nota se asigna a un tema con `tema: forense/introduccion` y,
+ * opcionalmente, su posición dentro de él con `orden: 1`.
+ * Las asignaturas sin temas muestran sus notas sin agrupar.
+ */
+export const TEMAS: Partial<Record<AsignaturaId, Tema[]>> = {
+  forense: [
+    {
+      id: 'introduccion',
+      nombre: 'Introducción',
+      descripcion: 'Qué es el análisis forense, cómo se trabaja, el papel del perito y el marco legal.',
+    },
+    {
+      id: 'adquisicion',
+      nombre: 'Adquisición de evidencias',
+      descripcion: 'Recoger, clonar y preservar evidencias sin alterarlas.',
+    },
+    {
+      id: 'artefactos-windows',
+      nombre: 'Artefactos de Windows',
+      descripcion: 'Dónde deja rastro la actividad en un sistema Windows y cómo analizarlo.',
+    },
+  ],
+};
+
+/** Claves válidas para el campo `tema` del frontmatter: "forense/introduccion"… */
+export const TEMA_KEYS = Object.entries(TEMAS).flatMap(([asig, temas]) =>
+  (temas ?? []).map((t) => `${asig}/${t.id}`),
+);
+
+/** Datos de un tema a partir de su clave, con su número (1, 2, 3…) en el temario. */
+export function getTema(key: string) {
+  const [asignatura, id] = key.split('/') as [AsignaturaId, string];
+  const temas = TEMAS[asignatura] ?? [];
+  const index = temas.findIndex((t) => t.id === id);
+  if (index === -1) return undefined;
+  return { ...temas[index], key, asignatura, numero: index + 1 };
 }
 
 /* ---------- Filtros extra (opcionales) ---------- */
