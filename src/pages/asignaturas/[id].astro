@@ -1,7 +1,8 @@
 ---
 /**
  * Temario de una asignatura: sus temas en orden, con las notas de cada uno
- * numeradas; debajo, sus casos prácticos y las notas que no tienen tema.
+ * numeradas; debajo, sus herramientas, sus casos prácticos y los conceptos
+ * que no tienen tema.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EntryCard from '../../components/EntryCard.astro';
@@ -16,7 +17,7 @@ export function getStaticPaths() {
 
 const id = Astro.params.id as AsignaturaId;
 const asignatura = ASIGNATURAS.find((a) => a.id === id)!;
-const { temas, casos, sinTema, total } = getTemario(id, await getAllEntries());
+const { temas, herramientas, casos, sinTema, total } = getTemario(id, await getAllEntries());
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
@@ -37,6 +38,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
         total > 0 && (
           <p class="asignatura__links">
             <a href={url(`/buscar/?asignatura=${id}`)}>Buscar dentro de esta asignatura →</a>
+            {herramientas.length > 0 && <a href="#herramientas">Herramientas ({herramientas.length}) ↓</a>}
             {casos.length > 0 && (
               <a href="#casos">
                 Casos prácticos ({casos.length}) ↓
@@ -88,8 +90,26 @@ const pad = (n: number) => String(n).padStart(2, '0');
     }
 
     {
+      herramientas.length > 0 && (
+        <section class="section ancla" id="herramientas" aria-labelledby="herramientas-titulo">
+          <div class="section-title">
+            <h2 id="herramientas-titulo" class="hash">
+              Herramientas
+            </h2>
+            <a href={url(`/herramientas/?asignatura=${id}`)}>ver todas las herramientas →</a>
+          </div>
+          <div class="grid grid--3">
+            {herramientas.map((entry) => (
+              <EntryCard entry={entry} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
       casos.length > 0 && (
-        <section class="section casos" id="casos" aria-labelledby="casos-titulo">
+        <section class="section ancla" id="casos" aria-labelledby="casos-titulo">
           <div class="section-title">
             <h2 id="casos-titulo" class="hash">
               Casos prácticos
@@ -110,7 +130,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
         <section class="section sin-tema" aria-labelledby="otras">
           <div class="section-title">
             <h2 id="otras" class="hash">
-              {temas.length > 0 ? 'Otras notas' : 'Notas'}
+              {temas.length > 0 ? 'Otros conceptos' : 'Conceptos'}
             </h2>
           </div>
           <div class="grid grid--3">
@@ -171,7 +191,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     gap: var(--space-2) var(--space-5);
   }
 
-  .casos {
+  .ancla {
     scroll-margin-top: calc(var(--header-h) + var(--space-4));
   }
 

@@ -95,7 +95,8 @@ La web queda en <http://localhost:4321>.
 
    | Archivo | URL |
    | --- | --- |
-   | `src/content/conceptos/nmap.md` | `/conceptos/nmap/` |
+   | `src/content/conceptos/modelo-osi.md` | `/conceptos/modelo-osi/` |
+   | `src/content/herramientas/nmap.md` | `/herramientas/nmap/` |
    | `src/content/casos/recon-red.md` | `/casos/recon-red/` |
 
 3. Rellena el frontmatter. No hay borradores: `npm run dev` muestra lo mismo
@@ -120,7 +121,7 @@ actualizado: 2026-11-22
 | --- | --- | --- |
 | `titulo` | sí | Texto |
 | `descripcion` | sí | Una frase, máx. 200 caracteres |
-| `tipo` | no | `concepto` (por defecto) o `herramienta`; en `casos/` siempre es `caso` |
+| `tipo` | no | Lo marca la carpeta: `concepto`, `herramienta` o `caso`. Se puede omitir |
 | `asignaturas` | sí, al menos una | Ver tabla de abajo |
 | `extras` | no | `comandos`, `linux`, `windows` |
 | `etiquetas` | no | Palabras clave extra para el buscador |
@@ -137,7 +138,9 @@ actualizado: 2026-11-22
 | `normativa` | Normativa de Ciberseguridad |
 | `bastionado` | Bastionado de Sistemas y Redes |
 
-El extra **Herramienta** no se escribe: se añade solo con `tipo: herramienta`.
+**Conceptos y herramientas.** Un concepto explica la teoría del tema (técnicas,
+normas, leyes) y puede comparar herramientas. Una nota de herramienta es de **una
+sola herramienta** y solo explica cómo se usa; para la teoría enlaza al concepto.
 
 ### Temas
 
@@ -259,7 +262,8 @@ entorno del build.
     │   ├── Icon.astro             Iconos SVG en línea
     │   └── search/                Buscador (SearchApp.astro + search.ts)
     ├── content/
-    │   ├── conceptos/             Conceptos y herramientas (.md)
+    │   ├── conceptos/             Conceptos: la teoría de cada tema (.md)
+    │   ├── herramientas/          Una nota por herramienta: cómo se usa (.md)
     │   └── casos/                 Casos prácticos (.md)
     ├── content.config.ts          Colecciones y esquema del frontmatter
     ├── data/site.ts               Identidad, navegación, asignaturas, extras y plantillas
@@ -276,7 +280,7 @@ entorno del build.
     ├── pages/
     │   ├── index.astro            Inicio
     │   ├── asignaturas/           Listado y temario de cada asignatura
-    │   ├── [section]/index.astro  Listados: conceptos y casos
+    │   ├── [section]/index.astro  Listados: conceptos, herramientas y casos
     │   ├── [section]/[slug].astro Página de cada nota
     │   ├── buscar.astro           Buscador
     │   ├── search-index.json.ts   Índice del buscador (generado en el build)

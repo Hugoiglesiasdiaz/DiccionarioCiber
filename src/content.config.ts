@@ -2,7 +2,8 @@
  * Colecciones de contenido.
  *
  * Cada nota es un archivo Markdown:
- *   src/content/conceptos/<slug>.md  → /conceptos/<slug>/
+ *   src/content/conceptos/<slug>.md     → /conceptos/<slug>/
+ *   src/content/herramientas/<slug>.md  → /herramientas/<slug>/
  *   src/content/casos/<slug>.md      → /casos/<slug>/
  *
  * El esquema valida el frontmatter en cada build: si falta un campo o un
@@ -47,7 +48,15 @@ export const collections = {
     loader: loader('conceptos'),
     schema: z.object({
       ...base,
-      tipo: z.enum(['concepto', 'herramienta']).default('concepto'),
+      tipo: z.literal('concepto').default('concepto'),
+    }).refine(temaDeSuAsignatura, temaError),
+  }),
+  /** Una nota por herramienta: solo cómo se usa. La teoría va en conceptos. */
+  herramientas: defineCollection({
+    loader: loader('herramientas'),
+    schema: z.object({
+      ...base,
+      tipo: z.literal('herramienta').default('herramienta'),
     }).refine(temaDeSuAsignatura, temaError),
   }),
   casos: defineCollection({

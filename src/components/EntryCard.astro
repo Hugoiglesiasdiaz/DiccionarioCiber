@@ -11,7 +11,7 @@ interface Props {
 const { entry } = Astro.props;
 const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 // "Herramienta" ya se ve como tipo de nota; aquí solo el resto de extras.
-const extras = EXTRAS.filter((x) => x.id !== 'herramienta' && entry.extras.includes(x.id));
+const extras = EXTRAS.filter((x) => entry.extras.includes(x.id));
 ---
 
 <article

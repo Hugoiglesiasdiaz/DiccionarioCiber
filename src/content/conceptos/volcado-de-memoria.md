@@ -3,7 +3,7 @@ titulo: Volcado de memoria RAM
 descripcion: "Cómo capturar la memoria de un equipo encendido en Windows y Linux, qué herramientas usar y qué diferencia hay entre memoria física y virtual."
 tipo: concepto
 asignaturas: [forense, incidentes]
-extras: [comandos, windows, linux]
+extras: [windows, linux]
 etiquetas: [RAM, memoria, DumpIt, WinPmem, LiME, AVML, pagefile, hiberfil, crash dump]
 tema: forense/adquisicion
 orden: 4
@@ -30,33 +30,13 @@ continuamente. Contiene información que no está en el disco:
 
 | Sistema | Herramientas |
 | --- | --- |
-| Windows | DumpIt, WinPmem, Magnet RAM Capture, Belkasoft RAM Capturer, FTK Imager, Mandiant Memoryze |
-| Linux | LiME, AVML |
-| Android | LiME (necesita un módulo compilado para ese kernel) |
+| Windows | [WinPmem](../../herramientas/winpmem/), DumpIt, Magnet RAM Capture, Belkasoft RAM Capturer, FTK Imager |
+| Linux | [AVML](../../herramientas/avml/) (sin compilar nada), [LiME](../../herramientas/lime/) (módulo para el kernel exacto) |
+| Android | [LiME](../../herramientas/lime/) |
 
-```bat
-:: Windows (consola como administrador, desde el USB)
-winpmem_mini_x64.exe E:\caso\memoria.raw
-```
-
-```bash
-# Linux con AVML: no hace falta saber la distribución ni el kernel
-sudo ./avml /media/usb/memoria.lime
-
-# Linux con LiME: módulo del kernel compilado para la versión exacta del sistema
-sudo insmod lime-$(uname -r).ko "path=/media/usb/memoria.lime format=lime"
-
-sha256sum /media/usb/memoria.lime
-```
-
-- **DumpIt** es lo más sencillo en Windows: se ejecuta, genera un volcado en formato
-  raw del tamaño de la RAM y un log en JSON con su hash SHA-256, todo en la carpeta desde
-  la que se lanza.
-- **AVML** es de Microsoft. Lee la memoria de `/dev/crash`, `/proc/kcore` o `/dev/mem`,
-  guarda en formato LiME, puede comprimir y enviar el resultado a un almacenamiento
-  remoto.
-
-El volcado se analiza después con [Volatility 3](../volatility/).
+Todas copian la RAM a un fichero (raw o formato LiME) y después se calcula su
+[hash](../funciones-hash/). El volcado se analiza con
+[Volatility 3](../../herramientas/volatility/).
 
 ## Memoria física y memoria virtual
 

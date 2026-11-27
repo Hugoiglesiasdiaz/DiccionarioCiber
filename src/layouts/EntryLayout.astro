@@ -25,7 +25,7 @@ interface Props {
 const { entry, toc = [], related = [], temaNav } = Astro.props;
 const temaAsig = temaNav ? getAsignatura(temaNav.tema.asignatura) : undefined;
 const temaHref = temaNav ? url(`/asignaturas/${temaNav.tema.asignatura}/#${temaNav.tema.id}`) : '';
-const extras = EXTRAS.filter((x) => x.id !== 'herramienta' && entry.extras.includes(x.id));
+const extras = EXTRAS.filter((x) => entry.extras.includes(x.id));
 const section = SECTIONS[entry.section];
 const date = new Date(entry.updated).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 ---

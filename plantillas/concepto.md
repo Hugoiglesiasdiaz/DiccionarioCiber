@@ -1,6 +1,8 @@
 ---
 # Copia este archivo a src/content/conceptos/<slug>.md
 # El nombre del archivo es la URL: modelo-osi.md → /conceptos/modelo-osi/
+# La teoría del tema. El uso de una herramienta concreta va en herramientas/
+# y se enlaza con ../../herramientas/<slug>/
 titulo: Nombre del concepto
 descripcion: Qué explica esta nota en una frase (máx. 200 caracteres).
 tipo: concepto

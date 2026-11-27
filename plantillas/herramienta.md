@@ -1,12 +1,14 @@
 ---
-# Copia este archivo a src/content/conceptos/<slug>.md
-# El nombre del archivo es la URL: nmap.md → /conceptos/nmap/
+# Copia este archivo a src/content/herramientas/<slug>.md
+# El nombre del archivo es la URL: nmap.md → /herramientas/nmap/
+# Una nota por herramienta y solo cómo se usa. La teoría, las normas y las
+# leyes van en un concepto; desde aquí se enlaza con ../../conceptos/<slug>/
 titulo: Nombre de la herramienta
 descripcion: Una frase (máx. 200 caracteres) que aparece en las tarjetas y en el buscador.
 tipo: herramienta
 # Al menos una: hacking | incidentes | produccion | forense | normativa | bastionado
 asignaturas: [forense]
-# Opcional: comandos | linux | windows ("herramienta" se añade sola)
+# Opcional: comandos | linux | windows
 extras: [comandos, linux]
 # Opcional: palabras clave extra para el buscador
 etiquetas: []

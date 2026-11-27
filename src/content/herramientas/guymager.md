@@ -17,24 +17,35 @@ que `dd`.
 
 ## Para qué sirve
 
-- Crear imágenes en tres formatos:
-
-| Formato | Características |
-| --- | --- |
-| **dd / raw** | Copia exacta, sin compresión ni metadatos. La lee cualquier herramienta |
-| **E01** (EWF, *Expert Witness Format*) | Comprimida, con metadatos del caso y hashes internos. Estándar de hecho (EnCase, FTK, Autopsy) |
-| **AFF** (*Advanced Forensic Format*) | Formato abierto con metadatos, hoy poco usado |
+- Crear imágenes en formato **dd/raw**, **E01** o **AFF**, opcionalmente divididas en
+  trozos. Diferencias entre ellos: [Formatos de imagen
+  forense](../../conceptos/formatos-imagen-forense/).
 
 - Calcular MD5, SHA-1 y SHA-256 durante la copia.
 - **Verificar** la imagen al terminar, releyendo la imagen y, si se pide, también el
   original.
 - Guardar un fichero `.info` con los datos del caso, del dispositivo y los resultados.
 
-## Uso habitual
+## Comandos habituales
+
+Guymager es gráfico: solo hay que lanzarlo con permisos para leer los discos.
 
 ```bash
-sudo guymager
+sudo guymager                      # abrir el programa
+lsblk -o NAME,MODEL,SERIAL,SIZE    # identificar antes el dispositivo de la evidencia
 ```
+
+| Opción de la ventana de adquisición | Para qué |
+| --- | --- |
+| *File format* | dd (con o sin trozos), E01 o AFF |
+| *Case number*, *Evidence number*, *Examiner*… | Datos del caso que se guardan en la imagen E01 y en el `.info` |
+| *Hash calculation* | MD5, SHA-1 y SHA-256 durante la copia |
+| *Verify image after acquisition* | Relee la imagen y comprueba su hash |
+| *Re-read source after acquisition* | Vuelve a leer el original y comprueba que no ha cambiado |
+
+## Ejemplo práctico
+
+Adquisición de un pendrive en E01 (datos de ejemplo):
 
 1. Pulsar **Rescan** para que aparezcan los dispositivos y localizar el pendrive por
    modelo, serie y tamaño.
@@ -65,6 +76,5 @@ sudo guymager
 > hardware o, como mínimo, marcar el dispositivo como solo lectura.
 
 > [!TIP]
-> Para un informe, E01 suele ser la mejor opción: ocupa menos y guarda los metadatos y
-> los hashes dentro de la propia imagen. Para analizarla en Linux, `ewfmount` la presenta
-> como una imagen raw.
+> Una imagen E01 creada con Guymager se comprueba y se monta con [libewf](../libewf/)
+> (`ewfverify`, `ewfmount`).

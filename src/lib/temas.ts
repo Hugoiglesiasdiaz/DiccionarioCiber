@@ -24,9 +24,9 @@ export function notasDelTema(key: string, entries: Entry[]): Entry[] {
 }
 
 /**
- * Temario de una asignatura: sus temas con las notas de cada uno, sus casos
- * prácticos (todos, para encontrarlos rápido) y las notas que no están en
- * ninguno de sus temas ni son casos.
+ * Temario de una asignatura: sus temas con las notas de cada uno, sus
+ * herramientas y casos prácticos (todos, para encontrarlos rápido) y los
+ * conceptos que no están en ninguno de sus temas.
  */
 export function getTemario(asignatura: AsignaturaId, entries: Entry[]) {
   const deLaAsignatura = entries.filter((e) => e.asignaturas.includes(asignatura));
@@ -35,11 +35,13 @@ export function getTemario(asignatura: AsignaturaId, entries: Entry[]) {
     return { ...t, key, numero: i + 1, notas: notasDelTema(key, deLaAsignatura) };
   });
   const keys = new Set(temas.map((t) => t.key));
-  const casos = deLaAsignatura.filter((e) => e.section === 'casos').sort(porTitulo);
+  const deSeccion = (s: Entry['section']) => deLaAsignatura.filter((e) => e.section === s).sort(porTitulo);
+  const herramientas = deSeccion('herramientas');
+  const casos = deSeccion('casos');
   const sinTema = deLaAsignatura.filter(
-    (e) => e.section !== 'casos' && (!e.tema || !keys.has(e.tema)),
+    (e) => e.section === 'conceptos' && (!e.tema || !keys.has(e.tema)),
   );
-  return { temas, casos, sinTema, total: deLaAsignatura.length };
+  return { temas, herramientas, casos, sinTema, total: deLaAsignatura.length };
 }
 
 /** Posición de una nota en su tema y sus vecinas, para la navegación. */

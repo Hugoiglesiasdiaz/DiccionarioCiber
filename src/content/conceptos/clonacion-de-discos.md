@@ -48,15 +48,15 @@ Es imprescindible al clonar por software.
 | Tipo | Ejemplos | Notas |
 | --- | --- | --- |
 | Hardware | Tableau, estaciones forenses | La opción fiable |
-| Software | RaTool en Windows (bloquea USB y otros dispositivos, con lista blanca), `blockdev --setro` y montaje en solo lectura en Linux | Complemento, no sustituto ([losetup](../losetup/)) |
+| Software | RaTool en Windows (bloquea USB y otros dispositivos, con lista blanca), `blockdev --setro` y montaje en solo lectura en Linux | Complemento, no sustituto ([losetup](../../herramientas/losetup/)) |
 
 ## Clonación por software
 
 | Herramienta | Sistema | Notas |
 | --- | --- | --- |
-| [dd](../dd/) | Linux | Básica, sin hash ni log |
-| [dc3dd](../dc3dd/) / dcfldd | Linux | Versiones forenses de dd: hash, log y errores |
-| [Guymager](../guymager/) | Linux | Interfaz gráfica, raw/E01/AFF |
+| [dd](../../herramientas/dd/) | Linux | Básica, sin hash ni log |
+| [dc3dd](../../herramientas/dc3dd/) / dcfldd | Linux | Versiones forenses de dd: hash, log y errores |
+| [Guymager](../../herramientas/guymager/) | Linux | Interfaz gráfica, raw/E01/AFF |
 | FTK Imager | Windows | Gráfica y gratuita, raw y E01 |
 | OSFClone | Arranque propio | Clonación desde un USB de arranque |
 

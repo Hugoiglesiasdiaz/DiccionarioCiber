@@ -26,10 +26,10 @@ y dejar registrada la cadena de custodia.
 - Estación forense con Linux (Kali, CAINE o similar) y la hora sincronizada con NTP.
 - **Bloqueador de escritura por hardware** (*write blocker*) USB.
 - Disco de destino con espacio de sobra, borrado previamente o recién formateado.
-- Herramientas: [dc3dd](../../conceptos/dc3dd/), [dd](../../conceptos/dd/),
-  [sha256sum](../../conceptos/sha256sum/), [losetup y blockdev](../../conceptos/losetup/),
-  [Guymager](../../conceptos/guymager/) (opcional) y
-  [The Sleuth Kit](../../conceptos/the-sleuth-kit/) (`mmls`, `fls`).
+- Herramientas: [dc3dd](../../herramientas/dc3dd/), [dd](../../herramientas/dd/),
+  [sha256sum](../../herramientas/sha256sum/), [losetup y blockdev](../../herramientas/losetup/),
+  [Guymager](../../herramientas/guymager/) (opcional) y
+  [The Sleuth Kit](../../herramientas/the-sleuth-kit/) (`mmls`, `fls`).
 
 Variables de ejemplo para el resto de la guía:
 

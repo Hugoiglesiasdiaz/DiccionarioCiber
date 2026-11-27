@@ -24,8 +24,19 @@ const current = Astro.url.pathname;
         {
           NAV.filter((item) => item.icon !== 'search').map((item) => (
             <li>
-              <a href={url(item.href)} aria-current={isActive(current, item.href) ? 'page' : undefined}>
-                {item.label}
+              <a
+                href={url(item.href)}
+                aria-current={isActive(current, item.href) ? 'page' : undefined}
+                aria-label={item.short ? item.label : undefined}
+              >
+                {item.short ? (
+                  <>
+                    <span class="nav__long">{item.label}</span>
+                    <span class="nav__short" aria-hidden="true">{item.short}</span>
+                  </>
+                ) : (
+                  item.label
+                )}
               </a>
             </li>
           ))
@@ -175,6 +186,12 @@ const current = Astro.url.pathname;
     font-family: var(--font-mono);
     font-size: var(--fs-sm);
     text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* Hasta 72rem no caben las etiquetas largas junto al buscador */
+  .nav__long {
+    display: none;
   }
 
   .nav a:hover {
@@ -238,6 +255,16 @@ const current = Astro.url.pathname;
     display: block;
   }
 
+  @media (min-width: 72rem) {
+    .nav__long {
+      display: inline;
+    }
+
+    .nav__short {
+      display: none;
+    }
+  }
+
   /* Barra inferior (solo móvil) */
   .bottom-nav {
     position: fixed;
@@ -267,7 +294,7 @@ const current = Astro.url.pathname;
     gap: 0.2rem;
     height: 100%;
     color: var(--faint);
-    /* Sans en vez de mono: "Herramientas" cabe en 1/5 de 320px */
+    /* Sans en vez de mono y etiquetas cortas: 6 huecos en 320px */
     font-family: var(--font-sans);
     font-size: 0.68rem;
     font-weight: 500;
@@ -282,7 +309,11 @@ const current = Astro.url.pathname;
     filter: drop-shadow(0 0 6px color-mix(in srgb, var(--green) 50%, transparent));
   }
 
-  @media (min-width: 48rem) {
+  /*
+   * Menú superior desde 56rem, con etiquetas cortas y el buscador como icono.
+   * Desde 72rem caben las etiquetas largas y la caja del buscador.
+   */
+  @media (min-width: 56rem) {
     .nav {
       display: block;
     }
@@ -290,7 +321,9 @@ const current = Astro.url.pathname;
     .bottom-nav {
       display: none;
     }
+  }
 
+  @media (min-width: 72rem) {
     .header__search {
       min-width: 12rem;
       padding: 0.35rem 0.6rem;

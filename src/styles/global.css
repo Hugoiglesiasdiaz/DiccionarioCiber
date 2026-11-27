@@ -188,7 +188,8 @@ body {
   padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
 }
 
-@media (min-width: 48rem) {
+/* Mismo punto en que desaparece la barra inferior (Header.astro) */
+@media (min-width: 56rem) {
   body {
     padding-bottom: 0;
   }

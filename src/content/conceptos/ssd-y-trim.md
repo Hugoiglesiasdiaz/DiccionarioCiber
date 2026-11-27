@@ -30,7 +30,7 @@ moviéndolos y puede borrarlos cuando quiera: escribe más rápido y dura más.
 | | Sin TRIM (o en un HDD) | Con TRIM |
 | --- | --- | --- |
 | Fichero borrado | Sus datos siguen ahí hasta que se sobrescriben | El SSD puede borrarlos **en cualquier momento**, sin que nadie escriba nada |
-| Recuperación | Probable, con [The Sleuth Kit](../the-sleuth-kit/) o *carving* | Muy difícil: las celdas suelen volver a cero |
+| Recuperación | Probable, con [The Sleuth Kit](../../herramientas/the-sleuth-kit/) o *carving* | Muy difícil: las celdas suelen volver a cero |
 
 Además, el SSD trabaja **por su cuenta en cuanto recibe corriente**, aunque esté
 conectado a un bloqueador de escritura: reorganiza datos, descarta celdas dañadas y

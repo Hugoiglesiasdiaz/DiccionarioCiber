@@ -17,11 +17,12 @@ Markdown y lo consulto sobre todo desde el móvil.
 | Tipo | Sección | Plantilla | Para qué |
 | --- | --- | --- | --- |
 | `concepto` | Conceptos | Libre (títulos `##`) | Ideas, técnicas, ataques, protocolos, normativa… |
-| `herramienta` | Conceptos | **Fija** | Un concepto que es una herramienta concreta. |
+| `herramienta` | Herramientas | **Fija** | Una sola herramienta y cómo se usa. Sin teoría transversal ni leyes. |
 | `caso` | Casos prácticos | **Fija** | Práctica o laboratorio paso a paso. |
 
-Las herramientas viven dentro de *Conceptos*. Se distinguen por el filtro
-**Herramienta** y por su plantilla fija.
+Las herramientas tienen su propia sección (`/herramientas/`), separada de
+*Conceptos*. La teoría, las normas y las leyes van en el concepto del temario, y
+la herramienta enlaza a él.
 
 **Plantilla de herramienta:** Qué es · Para qué sirve · Comandos habituales ·
 Ejemplo práctico · Errores típicos · Advertencias.
@@ -50,7 +51,6 @@ Cada nota puede tener **varios valores en cada grupo**.
 
 | id | Significado |
 | --- | --- |
-| Herramienta | Se pone solo si `tipo: herramienta`. |
 | `comandos` | La nota tiene comandos para copiar y pegar. |
 | `linux` | Aplica a Linux. |
 | `windows` | Aplica a Windows. |
@@ -77,7 +77,7 @@ actualizado: 2026-11-22
 ### Organización de archivos
 
 ```
-src/content/conceptos/volatility.md        → /conceptos/volatility/
+src/content/herramientas/volatility.md     → /herramientas/volatility/
 src/content/conceptos/orden-de-volatilidad.md
 src/content/casos/memoria-equipo-infectado.md → /casos/memoria-equipo-infectado/
 plantillas/concepto.md · herramienta.md · caso.md

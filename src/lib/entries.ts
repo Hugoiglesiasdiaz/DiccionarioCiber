@@ -15,7 +15,7 @@ export interface Entry {
   title: string;
   description: string;
   asignaturas: AsignaturaId[];
-  /** Filtros extra, incluido "herramienta" si la nota es de ese tipo. */
+  /** Filtros extra (comandos, linux, windows). */
   extras: ExtraId[];
   tags: string[];
   /** Fecha de última actualización (YYYY-MM-DD). */
@@ -39,7 +39,7 @@ export async function getRaw(section: SectionId): Promise<RawEntry[]> {
 
 export function toEntry(raw: RawEntry): Entry {
   const { data } = raw;
-  const extras: ExtraId[] = [...(data.tipo === 'herramienta' ? ['herramienta' as const] : []), ...data.extras];
+  const extras = data.extras as ExtraId[];
   return {
     slug: raw.id,
     section: raw.collection,

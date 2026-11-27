@@ -25,15 +25,16 @@ export type IconName = 'home' | 'tool' | 'flag' | 'book' | 'search' | 'layers';
 export interface NavItem {
   href: string;
   label: string;
-  /** Etiqueta corta para la barra inferior del móvil (si la normal no cabe). */
+  /** Etiqueta corta para el móvil y pantallas estrechas (si la normal no cabe). */
   short?: string;
   icon: IconName;
 }
 
 export const NAV: NavItem[] = [
   { href: '/', label: 'Inicio', icon: 'home' },
-  { href: '/asignaturas/', label: 'Asignaturas', icon: 'layers' },
+  { href: '/asignaturas/', label: 'Asignaturas', short: 'Temario', icon: 'layers' },
   { href: '/conceptos/', label: 'Conceptos', icon: 'book' },
+  { href: '/herramientas/', label: 'Herramientas', short: 'Tools', icon: 'tool' },
   { href: '/casos/', label: 'Casos prácticos', short: 'Casos', icon: 'flag' },
   { href: '/buscar/', label: 'Buscar', icon: 'search' },
 ];
@@ -44,7 +45,12 @@ export const SECTIONS = {
   conceptos: {
     label: 'Conceptos',
     href: '/conceptos/',
-    intro: 'Conceptos, técnicas y herramientas que voy aprendiendo, explicados para consultarlos rápido.',
+    intro: 'La teoría de cada tema: conceptos, técnicas, normas y leyes, explicados para consultarlos rápido.',
+  },
+  herramientas: {
+    label: 'Herramientas',
+    href: '/herramientas/',
+    intro: 'Una nota por herramienta: qué hace, sus comandos y cómo se usa. La teoría está en Conceptos.',
   },
   casos: {
     label: 'Casos prácticos',
@@ -88,6 +94,18 @@ export interface Tema {
  * Las asignaturas sin temas muestran sus notas sin agrupar.
  */
 export const TEMAS: Partial<Record<AsignaturaId, Tema[]>> = {
+  hacking: [
+    {
+      id: 'introduccion',
+      nombre: 'Conceptos de hacking ético',
+      descripcion: 'Qué es el hacking ético, amenazas y vulnerabilidades, cómo se valoran y cómo es una auditoría.',
+    },
+    {
+      id: 'osint',
+      nombre: 'Recopilación de información y OSINT',
+      descripcion: 'Reconocimiento pasivo: buscadores, dorks, DNS y dominios, metadatos y herramientas OSINT.',
+    },
+  ],
   forense: [
     {
       id: 'introduccion',
@@ -123,12 +141,7 @@ export function getTema(key: string) {
 
 /* ---------- Filtros extra (opcionales) ---------- */
 
-/**
- * "Herramienta" también es un filtro extra, pero no se escribe en `extras`:
- * se deduce de `tipo: herramienta`.
- */
 export const EXTRAS = [
-  { id: 'herramienta', label: 'Herramienta' },
   { id: 'comandos', label: 'Comandos' },
   { id: 'linux', label: 'Linux' },
   { id: 'windows', label: 'Windows' },
@@ -136,14 +149,14 @@ export const EXTRAS = [
 
 export type ExtraId = (typeof EXTRAS)[number]['id'];
 
-/** Extras que se pueden escribir en el frontmatter (todos menos "herramienta"). */
+/** Extras que se pueden escribir en el frontmatter. */
 export const EXTRAS_FRONTMATTER = ['comandos', 'linux', 'windows'] as const;
 
 /* ---------- Tipos de nota y sus plantillas ---------- */
 
 export const TIPOS = {
   concepto: { label: 'Concepto', section: 'conceptos' },
-  herramienta: { label: 'Herramienta', section: 'conceptos' },
+  herramienta: { label: 'Herramienta', section: 'herramientas' },
   caso: { label: 'Caso práctico', section: 'casos' },
 } as const;
 

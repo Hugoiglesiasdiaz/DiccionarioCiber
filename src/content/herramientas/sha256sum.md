@@ -10,13 +10,12 @@ actualizado: 2026-11-27
 
 ## Qué es
 
-`sha256sum` y `sha512sum` (de GNU coreutils) calculan el **hash** de un fichero o un
-dispositivo. Si un solo bit cambia, el hash cambia por completo. Por eso se usan para
-demostrar que una imagen es **idéntica** al original y que no ha cambiado desde que se
-adquirió.
+`sha256sum` y `sha512sum` (de GNU coreutils) calculan el **hash** SHA-256 o SHA-512 de
+un fichero o un dispositivo y verifican listas de hashes guardadas. Hay variantes con la
+misma sintaxis para otros algoritmos: `md5sum`, `sha1sum`, `sha384sum`.
 
-Existen también `md5sum` y `sha1sum`, pero MD5 y SHA-1 ya tienen **colisiones
-prácticas**. Hoy se usa SHA-256, a veces con SHA-512 de complemento.
+Qué es un hash y qué algoritmo conviene usar: [Funciones hash e
+integridad](../../conceptos/funciones-hash/).
 
 ## Para qué sirve
 
@@ -63,16 +62,15 @@ Momentos en los que se calcula o verifica un hash durante una adquisición:
 > `sha256sum -c` busca los ficheros con la ruta que aparece en el manifiesto. Ejecútalo
 > desde la misma carpeta o genera el manifiesto con rutas absolutas.
 
-> [!ERROR] Esperar el mismo hash en dos volcados de RAM
-> La memoria cambia continuamente: dos capturas seguidas **nunca** coinciden. El hash
-> solo garantiza que cada volcado no cambia después de hacerlo.
+> [!ERROR] Comparar hashes a ojo
+> Es fácil dar por buenos dos valores que solo coinciden al principio y al final. Usa
+> `sha256sum -c` o compara las cadenas con `[ "$a" = "$b" ]`.
 
 ## Advertencias
 
-> [!WARNING] Lo que un hash no demuestra
-> Que la imagen sea igual al original no prueba que la adquisición no alterase el
-> sistema, que se adquiriera lo correcto ni quién tuvo la evidencia. Eso lo cubre la
-> [cadena de custodia](../cadena-de-custodia/).
+> [!WARNING]
+> Leer un dispositivo para calcular su hash también es acceder a él: hazlo siempre a
+> través de un bloqueador de escritura.
 
 > [!TIP]
 > Hacer el hash de un disco entero lleva tanto como leerlo. [dc3dd](../dc3dd/) lo

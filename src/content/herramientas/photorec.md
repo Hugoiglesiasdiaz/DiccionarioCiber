@@ -102,5 +102,5 @@ photorec.log
 > exacto: forman parte de la documentación del procedimiento.
 
 > [!TIP]
-> En SSD con TRIM activado los bloques borrados suelen quedar a cero, por lo que la
-> recuperación es mucho menos probable que en discos mecánicos o tarjetas SD.
+> Si no recupera nada de un SSD, puede deberse a TRIM: ver
+> [SSD y TRIM](../../conceptos/ssd-y-trim/).

@@ -73,7 +73,7 @@ se guarda una imagen maestra y su hash.
 ## Cómo calcularlo
 
 - **Linux:** `md5sum`, `sha1sum`, `sha256sum`, `sha512sum`
-  ([sha256sum](../sha256sum/)).
+  ([sha256sum](../../herramientas/sha256sum/)).
 - **Windows:** `Get-FileHash` en PowerShell (SHA-256 por defecto) o `certutil`.
 - **Con interfaz gráfica:** HashMyFiles (NirSoft), IgorWare Hasher o HashCalc.
 
