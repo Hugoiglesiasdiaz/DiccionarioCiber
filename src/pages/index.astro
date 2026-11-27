@@ -1,7 +1,7 @@
 ---
 /**
- * Inicio: buscador grande, terminal decorativa, accesos por asignatura y
- * últimas notas.
+ * Inicio: buscador grande, terminal decorativa, accesos por asignatura,
+ * casos prácticos y últimas notas.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AsignaturaCards from '../components/AsignaturaCards.astro';
@@ -12,6 +12,7 @@ import { getAllEntries } from '../lib/entries';
 import { url } from '../lib/url';
 
 const ENTRIES = await getAllEntries();
+const CASOS = ENTRIES.filter((e) => e.section === 'casos');
 ---
 
 <BaseLayout>
@@ -80,6 +81,21 @@ const ENTRIES = await getAllEntries();
       </div>
       <AsignaturaCards entries={ENTRIES} />
     </section>
+
+    <!-- Casos prácticos -->
+    {
+      CASOS.length > 0 && (
+        <section class="section" aria-labelledby="casos">
+          <div class="section-title">
+            <h2 id="casos" class="hash">Casos prácticos</h2>
+            <a href={url('/casos/')}>ver todos →</a>
+          </div>
+          <div class="grid grid--3">
+            {CASOS.slice(0, 3).map((entry) => <EntryCard entry={entry} />)}
+          </div>
+        </section>
+      )
+    }
 
     <!-- Últimas notas -->
     <section class="section" aria-labelledby="recientes">

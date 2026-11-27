@@ -16,14 +16,17 @@ export interface TemaConNotas extends Tema {
 const porOrden = (a: Entry, b: Entry) =>
   (a.orden ?? Infinity) - (b.orden ?? Infinity) || a.title.localeCompare(b.title, 'es');
 
+const porTitulo = (a: Entry, b: Entry) => a.title.localeCompare(b.title, 'es');
+
 /** Notas de un tema concreto, ordenadas. */
 export function notasDelTema(key: string, entries: Entry[]): Entry[] {
   return entries.filter((e) => e.tema === key).sort(porOrden);
 }
 
 /**
- * Temario de una asignatura: sus temas con las notas de cada uno, y las
- * notas de la asignatura que no están en ninguno de sus temas.
+ * Temario de una asignatura: sus temas con las notas de cada uno, sus casos
+ * prácticos (todos, para encontrarlos rápido) y las notas que no están en
+ * ninguno de sus temas ni son casos.
  */
 export function getTemario(asignatura: AsignaturaId, entries: Entry[]) {
   const deLaAsignatura = entries.filter((e) => e.asignaturas.includes(asignatura));
@@ -32,8 +35,11 @@ export function getTemario(asignatura: AsignaturaId, entries: Entry[]) {
     return { ...t, key, numero: i + 1, notas: notasDelTema(key, deLaAsignatura) };
   });
   const keys = new Set(temas.map((t) => t.key));
-  const sinTema = deLaAsignatura.filter((e) => !e.tema || !keys.has(e.tema));
-  return { temas, sinTema, total: deLaAsignatura.length };
+  const casos = deLaAsignatura.filter((e) => e.section === 'casos').sort(porTitulo);
+  const sinTema = deLaAsignatura.filter(
+    (e) => e.section !== 'casos' && (!e.tema || !keys.has(e.tema)),
+  );
+  return { temas, casos, sinTema, total: deLaAsignatura.length };
 }
 
 /** Posición de una nota en su tema y sus vecinas, para la navegación. */

@@ -29,9 +29,12 @@ export interface Entry {
 
 export type RawEntry = CollectionEntry<SectionId>;
 
-/** Notas en bruto de una sección (sin borradores en producción). */
+/**
+ * Notas en bruto de una sección. No hay borradores: lo que está en
+ * src/content se publica, así que local y producción muestran lo mismo.
+ */
 export async function getRaw(section: SectionId): Promise<RawEntry[]> {
-  return getCollection(section, (e) => import.meta.env.DEV || !e.data.borrador);
+  return getCollection(section);
 }
 
 export function toEntry(raw: RawEntry): Entry {

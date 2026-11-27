@@ -71,7 +71,6 @@ asignaturas: [forense, incidentes] # al menos una
 extras: [comandos, linux, windows] # opcional
 etiquetas: [memoria, ram]          # opcional: solo para mejorar la búsqueda
 actualizado: 2026-11-22
-borrador: false                    # true = solo visible en local
 ---
 ```
 

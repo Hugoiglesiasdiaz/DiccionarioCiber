@@ -1,7 +1,7 @@
 ---
 /**
  * Temario de una asignatura: sus temas en orden, con las notas de cada uno
- * numeradas, y debajo las notas de la asignatura que no tienen tema.
+ * numeradas; debajo, sus casos prácticos y las notas que no tienen tema.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EntryCard from '../../components/EntryCard.astro';
@@ -16,7 +16,7 @@ export function getStaticPaths() {
 
 const id = Astro.params.id as AsignaturaId;
 const asignatura = ASIGNATURAS.find((a) => a.id === id)!;
-const { temas, sinTema, total } = getTemario(id, await getAllEntries());
+const { temas, casos, sinTema, total } = getTemario(id, await getAllEntries());
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
@@ -35,8 +35,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <h1>{asignatura.nombre}</h1>
       {
         total > 0 && (
-          <p>
+          <p class="asignatura__links">
             <a href={url(`/buscar/?asignatura=${id}`)}>Buscar dentro de esta asignatura →</a>
+            {casos.length > 0 && (
+              <a href="#casos">
+                Casos prácticos ({casos.length}) ↓
+              </a>
+            )}
           </p>
         )
       }
@@ -78,6 +83,24 @@ const pad = (n: number) => String(n).padStart(2, '0');
               </li>
             ))}
           </ol>
+        </section>
+      )
+    }
+
+    {
+      casos.length > 0 && (
+        <section class="section casos" id="casos" aria-labelledby="casos-titulo">
+          <div class="section-title">
+            <h2 id="casos-titulo" class="hash">
+              Casos prácticos
+            </h2>
+            <a href={url(`/casos/?asignatura=${id}`)}>ver todos los casos →</a>
+          </div>
+          <div class="grid grid--3">
+            {casos.map((entry) => (
+              <EntryCard entry={entry} />
+            ))}
+          </div>
         </section>
       )
     }
@@ -140,6 +163,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   .asignatura__eyebrow {
     color: var(--c);
+  }
+
+  .asignatura__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+
+  .casos {
+    scroll-margin-top: calc(var(--header-h) + var(--space-4));
   }
 
   .temario > h2 {

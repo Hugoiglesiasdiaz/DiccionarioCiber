@@ -19,6 +19,9 @@ export default defineConfig({
   site: process.env.SITE_URL ?? 'http://localhost:4321',
   base: process.env.BASE_PATH ?? '/',
   trailingSlash: 'always',
+  // Sin la barra de herramientas de Astro en `npm run dev`: así el local se ve
+  // igual que la web publicada.
+  devToolbar: { enabled: false },
   integrations: [
     // sitemap-index.xml con todas las páginas menos la 404.
     sitemap({ filter: (page) => !/\/404\/?$/.test(new URL(page).pathname) }),

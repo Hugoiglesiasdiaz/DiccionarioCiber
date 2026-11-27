@@ -25,8 +25,6 @@ const base = {
   /** Palabras clave adicionales para la búsqueda (no son filtros). */
   etiquetas: z.array(z.string()).default([]),
   actualizado: z.coerce.date(),
-  /** Los borradores se ven en `npm run dev` pero no se publican. */
-  borrador: z.boolean().default(false),
   /** Tema de una asignatura al que pertenece: "forense/introduccion" (ver TEMAS en site.ts). */
   tema: z.enum(TEMA_KEYS as [string, ...string[]]).optional(),
   /** Posición dentro del tema (1, 2, 3…). Sin orden, va al final por título. */

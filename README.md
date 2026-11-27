@@ -75,7 +75,7 @@ La web queda en <http://localhost:4321>.
 
 | Comando | Qué hace |
 | --- | --- |
-| `npm run dev` | Servidor de desarrollo con recarga en caliente (muestra también los borradores) |
+| `npm run dev` | Servidor de desarrollo con recarga en caliente |
 | `npm run build` | Genera la web estática en `dist/` |
 | `npm run preview` | Sirve `dist/` para revisarla antes de publicar |
 | `npm run check` | Comprueba tipos y plantillas de Astro |
@@ -98,8 +98,9 @@ La web queda en <http://localhost:4321>.
    | `src/content/conceptos/nmap.md` | `/conceptos/nmap/` |
    | `src/content/casos/recon-red.md` | `/casos/recon-red/` |
 
-3. Rellena el frontmatter. Mientras tenga `borrador: true` solo se ve en
-   `npm run dev`; quítalo para publicarla.
+3. Rellena el frontmatter. No hay borradores: `npm run dev` muestra lo mismo
+   que la web publicada. Una nota a medias no se sube a GitHub hasta que esté
+   lista.
 
 ### Frontmatter
 
@@ -112,7 +113,6 @@ asignaturas: [forense, incidentes]
 extras: [comandos, windows, linux]
 etiquetas: [memoria, ram, malware]
 actualizado: 2026-11-22
-borrador: true
 ---
 ```
 
@@ -127,7 +127,6 @@ borrador: true
 | `tema` | no | Tema de una de sus asignaturas: `forense/introduccion` (ver abajo) |
 | `orden` | no | Posición dentro del tema: `1`, `2`, `3`… |
 | `actualizado` | sí | Fecha `AAAA-MM-DD` |
-| `borrador` | no | `true` → visible en desarrollo, no se publica |
 
 | id | Asignatura |
 | --- | --- |

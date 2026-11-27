@@ -14,7 +14,6 @@ etiquetas: []
 # tema: forense/introduccion
 # orden: 1
 actualizado: 2026-01-01
-borrador: true # quítalo (o pon false) para publicarla
 ---
 
 ## Qué es
